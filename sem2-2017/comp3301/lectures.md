@@ -167,3 +167,199 @@ subject: ~()**COMP3301**~ -- Operating Systems Architecture
 - Counter to the copy protection and Digital Rights Management (DRM) movement
 - Started by Free Software Foundation (FSF), which has "copyleft" GNU Public License (GPL)
 - Examples include GNU/Linux and BSD UNIX (including core of Mac OS X), and many more
+
+
+# Operating-System Structures
+## Operating System Services
+- Operating systems provide an environment for execution of programs and services to programs and users
+- One set of operating-system services provides functions that are helpful to the user:
+    - **User interface** -- Almost all operating systems have a user interface (UI)
+        - Varies between Command-line (CLI), Graphics User Interface (GUI), Batch
+    - **Program execution** -- The system must be able to load a program into memory and to run that program, end execution, either normally or abnormally (indicating error)
+    - **IO operations** -- A running program may require IO, which may involve a file or an IO device
+    - **File-system manipulation** -- The file system is of particular interest. Programs need to read and write files and directories, create and delete them, search them, list file information, permission management
+    - **Communications** -- Processes may exchange information, on the same computer or between computers over a network
+    - **Error detection** -- OS needs to be constantly aware of possible errors
+        - May occur in the CPU and memory hardware, in IO devices, in user program
+        - For each type of error, OS should take the appropriate action to ensure correct and consistent computing
+        - Debugging facilities can greatly enhance the user's and programmer's abilities to efficiently use the system
+- Another set of OS functions exists for ensuring the efficient operation of the system itself via resource sharing
+    - **Resource allocation** -- When multiple users or multiple jobs running concurrently, resources must be allocated to each of them
+        - Many types of resources. Some (such as CPU cycles, main memory, and file storage) may have special allocation code, others (such as IO devices) may have general request and release code
+    - **Accounting** -- To keep track of which users use how much and what kinds of computer resources
+    - **Protection and security** -- The owners of information stored in a multiuser or networked computer system may want to control use of that information, concurrent processes should not interfere with each other
+        - **Protection** involves ensuring that all access to system resources is controlled
+        - **Security** of the system from outsiders requires user authentication, extends to defending external IO devices from invalid access attempts
+        - If a system is to be protected and secure, precautions must be instituted throughout it. A chain is only as strong as its weakest link
+
+## User Operating System Interface
+### CLI
+CLI or command interpreter allows direct command entry
+- Sometimes implemented in kernel, sometimes by systems program
+- Sometimes multiple flavors implemented -- shells
+- Primarily fetches a command from user and executes it
+    - Sometimes commands built-in, sometimes just names of programs
+        - If the latter, adding new features doesn't require shell modification
+### GUI
+- User-friendly desktop metaphor interface
+    - Usually mouse, keyboard, and monitor
+    - Icons represent files, programs, actions, etc
+    - Various mouse buttons over objects in the interface cause various actions (provide information, options, execute function, open directory)
+- Many systems now include both CLI and GUI interfaces
+### Touchscreen
+- Touchscreen devices require new interfaces
+    - Mouse not possible or not desired
+    - Actions and selection based on gestures
+    - Virtual keyboard for text entry
+
+## System Calls
+### System Call Parameter Passing
+- Often, more information is required than simply identity of desired system call
+    - Exact type and amount of information vary according to OS and call
+- Three general methods used to pass parameters to the OS
+    - Simplest: pass the parameters in registers
+        - In some cases, may be more parameters than registers
+    - Parameters stored in a block, or table, in memory, and address of block passed as a parameter in a register
+        - This approach taken by Linux and Solaris
+    - Parameters placed, or pushed, onto the stack by the program and popped off the stack by the operating system
+    - Block and stack methods do not limit the number or length of parameters being passed
+### Types of System Calls
+- Process control
+    - end, abort
+    - load, execute
+    - create process, terminate process
+    - get process attributes, set process attributes
+    - wait for time
+    - wait event, signal event
+    - allocate and free memory
+    - Dump memory if error
+    - Debugger for determining bugs, single step execution
+    - Locks for managing access to shared data between processes
+- File management
+    - create file, delete file
+    - open, close file
+    - read, write, reposition
+    - get and set file attributes
+- Device management
+    - request device, release device
+    - read, write, reposition
+    - get device attributes, set device attributes
+    - logically attach or detach devices
+- Information maintenance
+    - get time or date, set time or date
+    - get system data, set system data
+    - get and set process, file, or device attributes
+- Communications
+    - create, delete communication connection
+    - send, receive messages if message passing model to host name or process name
+        - from client to server
+    - shared-memory model create and gain access to memory regions
+    - transfer status information
+    - attach and detach remote devices
+- Protection
+    - control access to resources
+    - get and set permissions
+    - allow and deny user access
+
+## System Programs
+- System programs provide a convenient environment for program development and execution. They can be divided into:
+    - File manipulation
+    - Status information sometimes stored in a File modification
+    - Programming language support
+    - Program loading and execution
+    - Communications
+    - Background services
+    - Application programs
+- Most users' view of the operation system is defined by system programs, not the actual system calls
+- Provide a convenient environment for program development and execution
+    - Some of them are simply user interfaces to system calls; others are considerably more complex
+- **File management** -- Create, delete, copy, rename, print, dump, list, and generally manipulate files and directories
+- **Status information**
+    - Some ask the system for info -- date, time, amount of available memory, disk space, number of users
+    - Others provide detailed performance, logging, and debugging information
+    - Typically, these programs format and print the output of the terminal or other output devices
+    - Some systems implement a registry -- used to store and retrieve configuration information
+- **File modification**
+    - Text editors to create and modify files
+    - Special commands to search contents of files or perform transformations of the text
+- **Programming-language support** -- Compilers, assemblers, debuggers and interpreters sometimes provided
+- **Program loading and execution** -- Absolute loaders, relocatable loaders, linkage editors, and overlay-loaders, debugging systems for higher-level and machine language
+- **Communications** -- Provide the mechanism for creating virtual connections among processes, users, and computer systems
+    - Allow users to send messages to one another's screens, browse web pages, send electronic-mail messages, log in remotely, transfer files from one machine to another
+- **Background Services**
+    - Launch at boot time
+        - Some for system startup, then terminate
+        - Some from system boot to shutdown
+    - Provide facilities like disk checking, process scheduling, error logging, printing
+    - Run in user context not kernel context
+    - Known as services, subsystems, daemons
+- **Application programs**
+    - Don't pertain to system
+    - Run by users
+    - Not typically considered part of OS
+    - Launched by command line, mouse click, finger poke
+
+## Operating System Design and Implementation
+- Design and Implementation of best OS not "solvable", but some approaches have proven successful
+- User goals and System goals
+    - **User goals** -- operating system should be convenient to use, easy to learn, reliable, safe, and fast
+    - **System goals** -- operating system should be easy to design, implement, and maintain, as well as flexible, reliable, error-free, and efficient
+- Important principle to separate
+> Policy: What will be done?
+> Mechanism: How to do it?
+- Mechanisms determine how to do something, policies decide what will be done
+    - The separation of policy from mechanism is a very important principle, it allows maximum flexibility if policy decisions are to be changed later
+- Specifying and designing OS is highly creative task of software engineering
+
+## Implementation
+- Much variation
+    - Early OSes in assembly language
+    - Then system programming languages like Algol, PL/1
+    - Now C, C++
+- Actually usually a mix of languages
+    - Lowest levels in assembly
+    - Main body in C
+    - System programs in C, C++, scripting languages like PERL, Python, shell scripts
+- More high-level language easier to port to other hardware (but slower)
+- Emulation can allow an OS to run on non-native hardware
+
+### UNIX
+- limited by hardware functionality, the original UNIX operating system had limited structuring. The UNIX OS consists of two separable parts
+    - Systems programs
+    - The kernel
+        - Consists of everything below the system-call interface and above the physical hardware
+        - Provides the file system, CPU scheduling, memory management, and other operating-system functions; a large number of functions for one level
+
+### Layered Approach
+- The operating system is divided into a number of layers (levels), each built on top of lower layers. The bottom layer (layer 0), is the hardware; the highest (layer N) is the user interface
+- With modularity, layers are selected such that each uses functions (operations) and services of only lower-level layers
+
+## Microkernel System Structure
+- Moves as much from the kernel into user space
+- Communication takes place between user modules using message passing
+- Benefits:
+    - Easier to extend a microkernel
+    - Easier to port the operating system to new architectures
+    - More reliable (less code is running in kernel mode)
+    - More secure
+- Detriments:
+    - Performance overhead of user space to kernel space communication
+\TODO: Add diagram for microkernel space
+
+## Modules
+- Most modern operating systems implement loadable kernel modules
+    - Uses object-oriented approach
+    - Each core component is separate
+    - Each talks to the others over known interfaces
+    - Each is loadable as needed within the kernel
+- Overall, similar to layers but with more flexible
+    - Linux, Solaris, etc
+
+## System Boot
+- When power initialized on system, execution starts at a fixed memory location
+    - Firmware ROM used to hold initial boot code
+- Operating system must be made available to hardware so hardware can start it
+    - Small piece of code -- bootstrap loader, stored in ROM or EEPROM locates the kernel, loads it into memory, and starts it
+    - Sometimes two-step process where boot block at fixed location loaded by ROM code, which loads bootstrap loaded from disk
+- Common bootstrap loader, GRUB, allows selection of kernel from multiple disks, versions, kernel options
+- Kernel loads and system is then running
