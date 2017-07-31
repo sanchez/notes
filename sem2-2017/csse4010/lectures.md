@@ -4,7 +4,7 @@ title: ENGG2800 Lecture Notes
 alt-name: 43961229
 logo: /home/sanchez/Documents/logo.jpg
 school: University Of Queensland
-subject: ~()**Test Document**~ -- This is a test document for Hermes
+subject: ~()**CSSE4010**~ -- Digital System Design
 ---
 \toc
 \\
