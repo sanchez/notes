@@ -185,3 +185,33 @@ $$$
 1. Repeat steps 1-2 for all elements in the "on" set
 1. Select all *essential* prime implicants
 1. For all elements of the "on" set not covered by the essential prime implicants, select the smallest number of prime implicants that cover them
+
+# Combinational Building Blocks
+- Set of basic combinational building blocks:
+    - Multiplexers (MUXs) and demultiplexers (DMUXs)
+        - As a result, define ACTIVE HIGH and ACTIVE LOW terminology
+    - Encoders
+    - Decoders
+    - ROMs
+
+\\
+# Tutes
+## Tute 1
+|  |  | Inputs | Outputs |
+| --- | --- | --- | --- |
+| M | In{0} | In{1} | Out |
+| 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 1 |
+| 0 | 1 | 0 | 0 |
+| 0 | 1 | 1 | 1 |
+| 1 | 0 | 0 | 0 |
+| 1 | 0 | 1 | 0 |
+| 1 | 1 | 0 | 1 |
+| 1 | 1 | 1 | 1 |
+
+| M \ I{1}I{0} | 00 | 01 | 11 | 10 |
+| 0 | 0 |(lightblue) 1 |(lightblue) 1 | 0 |
+| 1 | 0 | 0 |(lightblue) 1 |(lightblue) 1 |
+$$$
+Out = \bar{M}I_0 + MI_1
+$$$
