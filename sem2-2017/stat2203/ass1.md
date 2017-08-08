@@ -75,3 +75,79 @@ $$$
 \mathbb{P}(A) &= \frac{\mid A\mid}{\mid\Omega\mid}\\
 &= \frac{2}{9}
 $$$
+
+# Question 4
+![Question 4 Answer](sem2-2017/stat2203/ass1.q4.png)[100]
+```
+~(blue)function~ result = ass1
+  N = ~(green)1e3~;
+  x = linspace(~(green)0~, ~(green)1~, N);
+  y = [~(green)1~:N];
+  for i = ~(green)1~:N
+    y(i) = systemFailure(x(i));
+  end
+  plot(x, y, ~(gold)"linewidth"~, ~(green)2~, x, x, ~(gold)"linewidth"~, 2);
+~(blue)endfunction~
+
+~(blue)function~ result = linkSuccess(p)
+  result = ~(green)1~ - p;
+~(blue)endfunction~
+
+~(blue)function~ result = sealSuccess(p)
+  result = ~(green)1~ - (~(green)1~ - linkSuccess(p))^~(green)2~;
+~(blue)endfunction~
+
+~(blue)function~ result = systemSuccess(p)
+  result = sealSuccess(p)^~(green)6~;
+~(blue)endfunction~
+
+~(blue)function~ result = systemFailure(p)
+  result = ~(green)1~ - systemSuccess(p);
+~(blue)endfunction~
+```
+
+# Question 5
+```
+~(blue)function~ result = ass1q5
+  N = ~(green)1e4~;
+  received = ~(green)0~;
+  sent0 = ~(green)0~;
+  for i = ~(green)1~:N
+    [s, r] = get\_receive\_bit();
+    ~(blue)if~ r == ~(green)1~
+      received += ~(green)1~;
+      ~(blue)if~ s == ~(green)0~
+        sent0 += ~(green)1~;
+      ~(blue)endif~
+    ~(blue)endif~
+  end
+  printf(~(gold)"%d:%d\n"~, received, sent0);
+~(blue)endfunction~
+
+~(blue)function~ [sent, received] = get\_receive\_bit
+  bit = get\_sent\_bit();
+  ~(blue)if~ bit == ~(green)1~
+    ~(blue)if~ rand >= ~(green)0.9~
+      received = bit;
+    ~(blue)else~
+      received = ~(green)0~;
+    ~(blue)endif~
+  ~(blue)else~
+    ~(blue)if~ rand >= ~(green)0.95~
+      received = bit;
+    ~(blue)else~
+      received = ~(green)1~;
+    ~(blue)endif~
+  ~(blue)endif~
+  sent = bit;
+~(blue)endfunction~
+
+~(blue)function~ result = get\_sent\_bit
+  ~(blue)if~ rand >= ~(green)0.5~
+    result = ~(green)1~;
+  ~(blue)else~
+    result = ~(green)0~;
+  ~(blue)endif~
+~(blue)endfunction~
+```
+Based on the code above, the output by running `ass1q5`, we can expect an answer close to `5241:4728`
