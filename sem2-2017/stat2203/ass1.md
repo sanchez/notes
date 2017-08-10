@@ -77,7 +77,6 @@ $$$
 $$$
 
 # Question 4
-![Question 4 Answer](sem2-2017/stat2203/ass1.q4.png)[100]
 ```
 ~(blue)function~ result = ass1
   N = ~(green)1e3~;
@@ -87,6 +86,8 @@ $$$
     y(i) = systemFailure(x(i));
   end
   plot(x, y, ~(gold)"linewidth"~, ~(green)2~, x, x, ~(gold)"linewidth"~, 2);
+  xlabel(~(gold)"Probability of ring failure"~);
+  ylabel(~(gold)"Probability of system failure"~);
 ~(blue)endfunction~
 
 ~(blue)function~ result = linkSuccess(p)
@@ -105,7 +106,9 @@ $$$
   result = ~(green)1~ - systemSuccess(p);
 ~(blue)endfunction~
 ```
-
+By running the above code, we get the output provided below. The point at which `systemFailure(p) = p` occurs at points `[0, 0.18, 1]` as visible from the diagram below.
+![Question 4 Answer](sem2-2017/stat2203/ass1.q4.png)[100]
+\\
 # Question 5
 ```
 ~(blue)function~ result = ass1q5
@@ -162,6 +165,8 @@ Based on the code above, the output by running `ass1q5`, we can expect an answer
   ~(blue)endfor~
   result;
   hist(result, ~(green)-3~:~(green)3~);
+  xlabel(~(gold)"Sum of draw with replace"~);
+  ylabel(~(gold)"Number of sums"~);
 ~(blue)endfunction~
 
 ~(blue)function~ result = sumWithReplace
@@ -169,4 +174,4 @@ Based on the code above, the output by running `ass1q5`, we can expect an answer
 ~(blue)endfunction~
 ```
 The above code generates the following histogram:
-![Question 6 Answer](sem2-2017/stat2203/ass1.q6.png)[75]
+![Question 6 Answer](sem2-2017/stat2203/ass1.q6.png)[100]
