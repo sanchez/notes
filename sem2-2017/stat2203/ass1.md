@@ -151,3 +151,22 @@ $$$
 ~(blue)endfunction~
 ```
 Based on the code above, the output by running `ass1q5`, we can expect an answer close to `5241:4728`
+
+# Question 6
+```
+~(blue)function~ ass1q6
+  N=1e4;
+  result = [~(green)-3~:~(green)3~];
+  ~(blue)for~ i = ~(green)1~:N
+    result(i) = sumWithReplace();
+  ~(blue)endfor~
+  result;
+  hist(result, ~(green)-3~:~(green)3~);
+~(blue)endfunction~
+
+~(blue)function~ result = sumWithReplace
+  result = sum(int8(rand(~(green)3~, ~(green)1~) * ~(green)2~) - ~(green)1~);
+~(blue)endfunction~
+```
+The above code generates the following histogram:
+![Question 6 Answer](sem2-2017/stat2203/ass1.q6.png)[75]
