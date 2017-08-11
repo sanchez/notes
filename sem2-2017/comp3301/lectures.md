@@ -847,3 +847,335 @@ dispatch_async(queue, ^{ printf("I am a block"); });
 | `CLONE_SIGHAND` | Signal handlers are shared
 | `CLONE_FILES` | The set of open files is shared
 - `struct task_struct` points to process data structures (shared or unique)
+
+# CPU Scheduling
+## Basic Concepts
+- Maximum CPU utilization obtained with multiprogramming
+- CPU-I/O Burst Cycle -- Process execution consists of a ~()cycle~ of CPU execution and I/O wait
+- **CPU burst** followed by **I/O burst**
+- CPU burst distribution is of main concern
+![CPU Burst](sem2-2017/comp3301/cpuburst.png)[50]
+
+### CPU Scheduler
+- **Short-term scheduler** selects from among the processes in ready queue, and allocates the CPU to one of them
+    - Queue may be ordered in various ways
+- CPU scheduling decisions may take place when a process:
+    1. Switches from running to waiting state
+    1. Switches from running to ready state
+    1. Switches from waiting to ready
+    1. Terminates
+- Scheduling under 1 and 4 is ~()nonpreemptive~
+- All other scheduling is ~()preemptive~
+    - Consider access to shared data
+    - Consider preemption while in kernel mode
+    - Consider interrupts occurring during crucial OS activities
+
+### Dispatcher
+- Dispatcher module gives control of the CPU to the process selected by the short-term scheduler; this involves:
+    - Switching context
+    - Switching to user mode
+    - Jumping to the proper location in the user program to restart that program
+- **Dispatch latency** -- time it takes for the dispatcher to stop one process and start another running
+
+## Scheduling Criteria
+- **CPU utilization** -- keep the CPU as busy as possible
+- **Throughput** -- number of processes that complete their execution per time unit
+- **Turnaround time** -- amount of time to execute a particular process
+- **Waiting time** -- amount of time a process has been waiting in the ready queue
+- **Response time** -- amount of time it takes from when a request was submitted until the first response is produced, (for time-sharing environment)
+
+## Scheduling Algorithms
+### Criteria
+- Max CPU utilization
+- Max throughput
+- Min turnaround time
+- Min waiting time
+- Min response time
+> May be interested in AVERAGE or WORST CASE figures
+
+### First-Come, First-Served (FCFS) Scheduling
+| Process | Burst Time
+| --- | --- |
+| P{1} | 24
+| P{2} | 3
+| P{3} | 3
+- Suppose that the processes arrive in the order: P{1}, P{2}, P{3}. The Gantt Chart for the schedule is:
+
+![FCFS](sem2-2017/comp3301/FCFS.png)[75]
+- Average waiting time is 17
+Suppose that the processess arrive in the order: P{2}, P{3}, P{1}
+- Average waiting time is 3
+- Much better than previous case
+- **Convoy effect** -- short process behind long process
+    - Consider one CPU-bound and many I/O-bound processes
+
+### Shortest-Job-First (SJF) Scheduling
+- Associate with each process the length of its next CPU burst
+    - Use these lengths to schedule the process with the shortest time
+- SJF is optimal -- gives minimum average waiting time for a given set of processes
+    - The difficulty is knowing the length of the next CPU requent
+    - Could ask the user
+
+Determining Length of Next CPU Burst
+====
+- Can only estimate the length -- should be similar to the previous one
+    - Then pick process with shortest predicted next CPU burst
+- Can be done by using the length of previous CPU bursts, using exponential averaging
+    1. *t{n}* = actual length of *n{{th}}* CPU burst
+    1. *\mathcal{t}{n+1}* = predicted value for the next CPU burst
+    1. *\alpha*, 0 \leq\alpha\leq 1
+    1. Define:
+$$$
+\mathcal{t}_{n=1} = \alpha t_n + (1 - \alpha) \mathcal{t}_n
+$$$
+- Commonly, \alpha set to 1/2
+- Preemptive version called **shortest-remaining-time-first**
+
+### Example of Shortest-remaining-time-first
+- Now we add the concepts of varying arrival times and preemption to the analysis
+| Process | Arrival Time | Burst Time
+| --- | --- | --- |
+| P{1} | 0 | 8
+| P{2} | 1 | 4
+| P{3} | 2 | 9
+| P{4} | 3 | 5
+![Preemptive SJF Gantt Chart](sem2-2017/comp3301/SRTF.png)[50]
+- Average waiting time = 6.5
+
+### Priority Scheduling
+- A priority number (integer) is associated with each process
+- The CPU is allocated to the process with the highest priority (smallest integer = highest priority)
+    - Preemptive
+    - Nonpreemptive
+- SJF is priority scheduling where priority is the inverse of predicted next CPU burst time
+- Problem = **Starvation** -- low priority processes may never execute
+- Solution = **Aging** -- as time progresses increase the priority of the process
+
+### Example of Priority Scheduling
+| Process | Burst Time | Priority
+| --- | --- | --- |
+| P{1} | 10 | 3
+| P{2} | 1 | 1
+| P{3} | 2 | 4
+| P{4} | 1 | 5
+| P{5} | 5 | 2
+![Priority Scheduling Example](sem2-2017/comp3301/priority.png)[50]
+- Average waiting time = 8.2
+
+### Round Robin
+- Each process gets a small unity of CPU time (**time quantum** q), usually 10-100 milliseconds. After this time has elapsed, the process is preempted and added to the end of the ready queue
+- If there are *n* processes in the ready queue and the time quantum is *q*, then each process gets *1/n* of the CPU time in chunks of at most *q* time units at once. No process waits more than *(1-n)q* time units.
+- Timer interrupts every quantum to schedule next process
+- Performance
+    - *q* large -> FIFO
+    - *q* small -> *q* must be large with respect to context switch, otherwise overhead is too high
+
+### Multilevel Queue
+- Ready queue is partitioned into separate queues, e.g.
+    - **foreground** (interactive)
+    - **background** (batch)
+- Process permanently in a given queue
+- Each queue has its own scheduling algorithm:
+    - foreground -- RR
+    - background -- FCFS
+- Scheduling must be done between the queues:
+    - Fixed priority scheduling (i.e. serve all from foreground then from background). Possibility of starvation
+    - Time slice -- each queue gets a certain amount of CPU time which it can schedule amongst its processes; i.e. 80% to foreground in RR
+    - 20% to background in FCFS
+
+### Multilevel Feedback Queue
+- A process can move between the various queue; aging can be implemented this way
+- Multilevel-feedback-queue scheduler defined by the following parameters:
+    - number of queues
+    - scheduling algorithms for each queue (may be different)
+    - method used to determine when to upgrade a process
+    - method used to determine when to demote a process
+    - method used to determine which queue a process will enter when that process needs service
+- Most general algorithm, but also most complicated
+
+## Thread Scheduling
+- Distinction between user-level and kernel-level threads
+- When threads supported, threads scheduled, not processes
+- Many-to-one and many-to-many models, thread library schedules user-level threads to run on LWP (lightweight processes)
+    - Known as ~()process-contention scope~(**PCS**) since scheduling competition is within the process
+    - Typically done via priority set by programmer
+- Kernel thread scheduled onto available CPU is ~()system-contention scope~ (**SCS**) -- competition among all threads in system
+
+## Multiple-Processor Scheduling
+- CPU scheduling more complex when multiple CPUs are available
+- **Homogeneous processors** within a multiprocessor
+- **Asymmetric multiprocessing** (**SMP**) -- each processor is self-scheduling, all processes in common ready queue, or each has its own private queue of ready processes
+    - Currently, most common
+- **Processor affinity** -- process has affinity for processor on which it is currently running
+    - ~()soft affinity~
+    - ~()hard affinity~
+    - Variations including processor sets
+
+### Load Balancing
+- If SMP, need to keep all CPUs loaded for efficiency
+- **Load balancing** attempts to keep workload evenly distributed
+- **Push migration** -- periodic task checks load on each processor, and if found pushes task from overloaded CPU to other CPUs
+- **Pull migration** -- idle processors pulls waiting task from busy processor
+
+### Multicore Processors
+- Recent trend to place multiple processor cores on same physical chip
+- Faster and consumes less power than multiple chips
+- Multiple threads per core also growing
+    - Takes advantage of memory stall to make progress on another thread while memory retrieve happens
+
+### Virtualization and Scheduling
+- Virtualization software schedules multiple guests onto CPU(s)
+- Each guest doing its own scheduling
+    - Not knowing it doesn't own the CPUs
+    - Can result in poor response time
+    - Can effect time-of-day clocks in guests
+- Can undo good scheduling algorithm efforts of guests
+
+## Real-Time CPU Scheduling
+- Can present obvious challenges
+- **Soft real-time systems** -- no guarantee as to when critical real-time process will be scheduled
+- **Hard real-time systems** -- task must be serviced by its deadline
+- Two types of latencies affect performance
+    1. ~()Interrupt latency~ -- time from arrival of interrupt to start of routine that services interrupt
+    1. ~()Dispatch latency~ -- time for schedule to take current process off CPU and switch to another
+- Conflict phase of dispatch latency:
+    1. Preemption of any process running in kernel mode
+    1. Release by low-priority process of resources
+
+### Priority-based Scheduling
+- For real-time scheduling, scheduler must support preemptive, priority-based scheduling
+    - But only guarantees soft real-time
+- For hard real-time must also provide ability to meet deadlines
+- Processes have new characteristics: ~()periodic~ ones require CPU at constant intervals
+    - Has processing time *t*, deadline *d*, period *p*
+    - 0 \leq *t* \leq *d* \leq *p*
+    - ~()Rate~ of periodic task is *1/p*
+
+### Rate Montonic Scheduling
+- A priority is assigned based on the inverse of its period
+- Shorter periods = higher priority
+- Longer periods = lower priority
+- P{1} is assigned a higher priority than P{2}
+
+### Earliest Deadline First Scheduling (EDF)
+- Priorities are assigned according to deadlines:
+    - the earlier the deadline, the higher the priority
+    - the later the deadline, the lower the priority
+
+### Proportional Share Scheduling
+- *T* shares are allocated among all processes in the system
+- An application receives *N* shares where *N < T*
+- This ensures each application will receive *N/T* of the total processor time
+
+## Operating Systems Examples
+### Linux Scheduling
+- ~()Completely Fair Scheduler~ (CFS)
+- **Scheduling classes**
+    - Each has specific priority
+    - Scheduler picks highest priority task in highest scheduling class
+    - Rather than quantum based on fixed time allotments, based on proportion of CPU time
+    - 2 scheduling classes included, others can be added
+        1. default
+        1. real-time
+- Quantum calculated based on ~()nice value~ from -20 to +19
+    - Lower value is higher priority
+    - Calculates ~()target latency~ -- interval of time during which task should run at least once
+    - Target latency can increase if say number of active tasks increases
+- CFS scheduler maintains per task **virtual run time** in variable `vruntime`
+    - Associated with decay factor based on priority of task -- lower priority is higher decay rate
+    - Normal default priority yields virtual run time = actual run time
+- To decide next task to run, scheduler picks task with lowest virtual run time
+- Real-time scheduling according to POSIX.1b
+    - Real-time tasks have static priorities
+- Real-time plus normal map into global priority scheme
+- Nice value of -20 maps to global priority 100
+- Nice value of +19 maps to priority 139
+
+### Windows Scheduling
+- Windows uses priority-based preemptive scheduling
+- Highest-priority thread runs next
+- **Dispatcher** is scheduler
+- Thread runs until:
+    1. blocks
+    1. uses time slice
+    1. preempted by higher-priority thread
+- Real-time threads can preempt non-real-time
+- 32-level priority scheme
+- **Variable class** is 1-15, **real-time class** is 16-31
+- Priority 0 is memory-management thread
+- Queue for each priority
+- If no run-able thread, runs **idle thread**
+
+### Solaris Scheduling
+- Priority-based scheduling
+- Six classes available
+    - Time sharing (default) (TS)
+    - Interactive (IA)
+    - Real time (RT)
+    - System (SYS)
+    - Fair Share (FSS)
+    - Fixed priority (FP)
+- Given thread can be in one class at a time
+- Each class has its own scheduling algorithm
+- Time sharing is multi-level feedback queue
+    - Loadable table configurable by sysadmin
+
+## Algorithm Evaluation
+- How to select CPU-scheduling algorithm for an OS?
+- Determine criteria, then evaluate algorithms
+- **Deterministic modelling**
+    - Type of ~()analytic evaluation~
+    - Takes a particular predetermined workload and defines the performance of each algorithm for that workload
+- Consider 5 processes arriving at time 0
+| Process | Burst Time
+| --- | --- |
+| P{1} | 10
+| P{2} | 29
+| P{3} | 3
+| P{4} | 7
+| P{5} | 12
+
+### Deterministic Evaluation
+- For each algorithm, calculate minimum average waiting time
+- Simple and fast, but requires exact numbers for input, applies only to those inputs
+    - FCS is 28ms
+    - Non-preemptive SFJ is 13ms
+    - RR is 23ms
+
+### Queueing Models
+- Describes the arrival of processes, and CPU and IO bursts probabilistically
+    - Commonly exponential, and described by mean
+    - Computes average throughput, utilization, waiting time, etc
+- Computer system described as network of servers, each with queue of waiting processes
+    - Knowing arrival rates and service rates
+    - Computes utilization, average queue length, average wait time, etc
+
+### Littles Law
+- *n* = average queue length
+- *W* = average waiting time in queue
+- *\lambda* = average arrival rate into queue
+- Little's law - in steady state, processes leaving queue must equal processes arriving, thus *n=\lambda x W*
+    - Valid for any scheduling algorithm and arrival distribution
+- For example, if on average 7 processes arrive per second, and normally 14 processes in queue, then average wait time per process = 2 seconds
+
+### Simulations
+- Queueing models limited
+- ~()Simulations~ more accurate
+    - Programmed model of computer system
+    - Clock is a variable
+    - Gather statistics indicating algorithm performance
+    - Data to drive simulation gathered via
+        - Random number generator according to probabilities
+        - Distributions defined mathematically or empirically
+        - Trace tapes record sequences of real events in real systems
+
+### Implementation
+- Even simulations have limited accuracy
+- Just implement new scheduler and test in real systems
+    - High cost, high risk
+    - Environments vary
+- Most flexible schedulers can be modified per-site or per-system
+- Or APIs to modify priorities
+- But again environments vary
+
+# Next Chap here
