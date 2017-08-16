@@ -131,15 +131,15 @@ By running the above code, we get the output provided below. The point at which 
   bit = get\_sent\_bit();
   ~(blue)if~ bit == ~(green)1~
     ~(blue)if~ rand >= ~(green)0.9~
-      received = bit;
-    ~(blue)else~
       received = ~(green)0~;
+    ~(blue)else~
+      received = bit;
     ~(blue)endif~
   ~(blue)else~
     ~(blue)if~ rand >= ~(green)0.95~
-      received = bit;
-    ~(blue)else~
       received = ~(green)1~;
+    ~(blue)else~
+      received = bit;
     ~(blue)endif~
   ~(blue)endif~
   sent = bit;
@@ -153,24 +153,24 @@ By running the above code, we get the output provided below. The point at which 
   ~(blue)endif~
 ~(blue)endfunction~
 ```
-Based on the code above, the output by running `ass1q5`, we can expect an answer close to `5241:4728`
+Based on the code above, the output by running `ass1q5`, we can expect an answer close to `247:4772`
 
 # Question 6
 ```
 ~(blue)function~ ass1q6
   N=1e4;
-  result = [~(green)-3~:~(green)3~];
+  result = [~(green)1~:N];
   ~(blue)for~ i = ~(green)1~:N
     result(i) = sumWithReplace();
   ~(blue)endfor~
   result;
-  hist(result, ~(green)-3~:~(green)3~);
+  hist(result, ~(green)-2~:~(green)2~);
   xlabel(~(gold)"Sum of draw with replace"~);
   ylabel(~(gold)"Number of sums"~);
 ~(blue)endfunction~
 
 ~(blue)function~ result = sumWithReplace
-  result = sum(int8(rand(~(green)3~, ~(green)1~) * ~(green)2~) - ~(green)1~);
+  result = sum(int8(rand(~(green)2~, ~(green)1~) * ~(green)2~) - ~(green)1~);
 ~(blue)endfunction~
 ```
 The above code generates the following histogram:
