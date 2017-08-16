@@ -106,7 +106,7 @@ $$$
   result = ~(green)1~ - systemSuccess(p);
 ~(blue)endfunction~
 ```
-By running the above code, we get the output provided below. The point at which `systemFailure(p) = p` occurs at points `[0, 0.18, 1]` as visible from the diagram below.
+By running the above code, we get the output provided below. The point at which `systemFailure(p) = p` occurs at points `0.18` as visible from the diagram below.
 ![Question 4 Answer](sem2-2017/stat2203/ass1.q4.png)[100]
 \\
 # Question 5
@@ -170,7 +170,7 @@ Based on the code above, the output by running `ass1q5`, we can expect an answer
 ~(blue)endfunction~
 
 ~(blue)function~ result = sumWithReplace
-  result = sum(int8(rand(~(green)2~, ~(green)1~) * ~(green)2~) - ~(green)1~);
+  result = sum(randi([-~(green)1~, ~(green)1~], ~(green)2~, ~(green)1~));
 ~(blue)endfunction~
 ```
 The above code generates the following histogram:
