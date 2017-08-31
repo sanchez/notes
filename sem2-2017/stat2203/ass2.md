@@ -78,7 +78,7 @@ s &= 0\\
 0 &= rs(1-s-r+rs)\tag{\text{When $r$ is 1, When $s$ is 0}}\\
 0 &= 0
 $$$
-
+\\
 # Question 3
 $$$
 L(\theta;p) &= \prod^5_{i=1}(1-p)^{x_i}p\\
@@ -92,3 +92,97 @@ l(\theta;p) &= \sum^5_{i=1}\log\left((1-p)^{x_i-1}\right) + \log(p)\\
 \frac{n}{p} &= \sum^5_{i=1}(x_i)\\
 p &= \frac{n}{\sum^5_{i=1}(x_i)} = \frac{1}{\bar{x}}
 $$$
+
+# Question 4
+```
+function result = ass2q1
+  N=1e4;
+  results = 1:N;
+  for i = 1:N;
+    results(i) = drop_ball(0, 0);
+  endfor
+  hist(results, 0:4);
+  xlabel("Ball Fall Position");
+  ylabel("Number of balls in position");
+endfunction
+
+function result = drop_ball(level, position)
+  if (level >= 4)
+    result = position;
+  else
+    direction = rand > 0.5;
+    result = drop_ball(level + 1, position + direction);
+  endif
+endfunction
+```
+![Result for Question 4](sem2-2017/stat2203/ass2.q4.png)[100]
+\\
+# Question 5
+```
+function result = ass2q2
+  N = 1e2;
+  totals = zeros(N, N);
+  for i = 1:N
+    for j = 1:N
+      totals(i, j) = calcRS(i/N, j/N);
+    endfor
+  endfor
+  mesh(1:N, 1:N, totals);
+  title("Question 5");
+  xlabel("Value for r");
+  ylabel("Value for s");
+  zlabel("Resulting probability");
+endfunction
+
+function result = calcRS(r, s)
+  result = sumRS(0, 0, r, s) + sumRS(0, 1, r, s) + sumRS(1, 0, r, s) + 
+    sumRS(1, 1, r, s);
+endfunction
+
+function result = sumRS(u, v, r, s)
+  result = abs(probUV(u, v, r, s) - (probU(u, r, s) * probV(v, r, s)));
+endfunction
+
+function result = probUV(u, v, r, s)
+  if (u == 1 && v == 1)
+    result = r * s;
+  elseif (u == 0 && v == 0)
+    result = (1 - r) * (1 - s);
+  elseif (u == 0 && v == 1)
+    result = r*(1-s) + s*(1-r);
+  elseif (u == 1 && v == 0)
+    result = 0;
+  else
+    # Should not reach this
+    result = -1;
+  endif;
+endfunction
+
+function result = probU(u, r, s)
+  result = probUV(u, 0, r, s) + probUV(u, 1, r, s);
+endfunction
+
+function result = probV(v, r, s)
+  result = probUV(0, v, r, s) + probUV(1, v, r, s);
+endfunction
+```
+![Result for Question 5](sem2-2017/stat2203/ass2.q5.png)[100]
+
+# Question 6
+```
+function result = ass2q6
+  N=5e4;
+  totals=1:N;
+  for i = 1:N
+    totals(i) = pmf(randi(5));
+  endfor
+  hist(totals, 0:0.1:0.4);
+  xlabel("pmf result");
+  ylabel("Number of results");
+endfunction
+
+function result = pmf(x)
+  result = (1/3) * (2/3)^(x - 1);
+endfunction
+```
+![Result for Question 6](sem2-2017/stat2203/ass2.q6.png)[100]
