@@ -1,5 +1,5 @@
 ---
-author: Daniel Fitz
+author: Daniel Fitzmaurice
 title: STAT2203 Assignment 2
 alt-name: 43961229
 logo: /home/sanchez/Documents/logo.jpg
@@ -48,6 +48,7 @@ Using the above table, we can see that U and V will both take on values {*0, 1*}
 | 0,1 | 1,0 + 0,1 | *r(1-s) + s(1-r)*
 | 1,0 | *Not possible* | *0*
 | 1,1 | 1,1 | *rs*
+\\
 Therefore the following joint pmf table can be calculated
 | U\V | 0 | 1
 | 0 | *(1-r)(1-s)* | *r(1-s) + s(1-r)*
