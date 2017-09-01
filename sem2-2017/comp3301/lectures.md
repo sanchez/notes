@@ -1443,3 +1443,154 @@ monitor monitor-name {
     - Log-based Recovery
     - Checkpoints
     - Concurrent Atomic Transactions
+
+# Deadlocks
+- To develop a description of deadlocks, which prevent sets of concurrent processes from completing their tasks
+- To present a number of different methods for preventing or avoiding deadlocks in a computer system
+
+## System Model
+- System consists of resources
+- Resource types *R{1}, R{2}, ..., R{m}*
+    - CPU cycles, memory space, I/O devices
+- Each resource type *R{i}* has *W{i}* instances
+- Each process utilizes a resource as follows:
+    - ~()request~
+    - ~()use~
+    - ~()release~
+
+## Deadlock Characterization
+Deadlock can arise if four conditions hold simultaneously.
+- **Mutual exclusion:** only one process at a time can use a resource
+- **Hold and wait:** a process holding at least one resource is waiting to acquire additional resources held by other processes
+- **No preemption:** a resource can be released only voluntarily by the process holding it, after that process has completed its task
+- **Circular wait:** there exists a set *\{P{0}, P{1}, ..., P{n}\}* of waiting processes such that *P{0}* is waiting for a resource that is held by *P{1}*, *P{1}* is waiting for a resource that is held by *P{2}, ..., P{n-1}* is waiting for a resource that is held by *P{n}*, and *P{n}* is waiting for a resource that is held by *P{0}*.
+
+### Deadlock with Mutex Locks
+- Deadlocks can occur via system calls, locking, etc
+- Task 1
+```
+Lock(Resource_1);
+Lock(Resource_2);
+// Do Stuff
+Unlock(Resource_2);
+Unlock(Resource_1);
+```
+- Task 2
+```
+Lock(Resource_2);
+Lock(Resource_1);
+// Do Stuff
+Unlock(Resource_1);
+Unlock(Resource_2);
+```
+
+### Resource-Allocation Graph
+A set of vertices *V* and a set of edges *E*
+- *V* is partitioned into two types:
+    - *P = \{P{1}, P{2}, ..., P{n}\},* the set consisting of all the processes in the system
+    - *R = \{R{1}, R{2}, ..., R{m}\},* the set consisting of all resource types in the system
+- ~()Request edge~ -- directed edge *P{i} -> R{j}*
+- ~()Assignment edge~ -- directed edge *R{j} -> P{i}*
+- Can be analysed to detect deadlock
+![Resource-Allocation Graph](sem2-2017/comp3301/resource.png)[50]
+
+Basic Facts:
+- If graph contains no cycles => no deadlock
+- If graph contains a cycle =>
+    - if only one instance per resource type, then deadlock
+    - if several instances per resource type, possibility of deadlock
+
+## Methods for Handling Deadlocks
+- Ensure that the system will ~()never~ enter a deadlock state
+- Allow the system to enter a deadlock state and then recover
+- Ignore the problem and pretend that deadlocks never occur in the systeml used by most operating systems, including UNIX
+
+## Deadlock Prevention
+Restrain the ways request can be made
+- **Mutual Exclusion** -- not required for sharable resources; must hold for nonsharable resources
+- **Hold and Wait** -- must guarantee that whenever a process requests a resource, it does not hold any other resources
+    - Require process to request and be allocated all its resources before it begins execution, or allow process to request resources only when the process has none
+    - Low resource utilization; starvation possible
+- **No Preemption** --
+    - If a process that is holding some resources requests another resource that cannot be immediately allocated to it, then all resources currently being held are released
+    - Preempted resources are added to the list of resources for which the process is waiting
+    - Process will be restarted only when it can regain its old resources, as well as the new ones that it is requesting
+- **Circular Wait** -- impose a total ordering of all resource types, and require that each process requests resources in an increasing order of enumeration
+
+### Deadlock Avoidance
+Requires that the system has some additional *a priori* information available
+- Simplest and most useful model requires that each process declare the **maximum number** of resources of each type that it may need
+- The deadlock-avoidance algorithm dynamically examines the resource-allocation state to ensure that there can never be a circular-wait condition
+- Resource-allocation *state* is defined by the number of available and allocated resources, and the maximum demands of the processes
+
+### Safe State
+- When a process requests an available resource, system must decide if immediate allocation leaves the system in a safe state
+- System is in **safe state** if there exists a sequence <P{1}, P{2}, ..., P{n}> of ALL processes in the systems such that for each *P{i}*, the resources that *P{i}* can still request can be satisfied by currently available resources + resources held by all the *P{j}*, with *j < i*
+- That is:
+    - If *P{i}* resource needs are not immediately available, then *P{i}* can wait until all *P{j}* have finished
+    - When *P{j}* is finished, *P{i}* can obtain needed resources, execute, retuen allocated resources, and terminate
+    - When *P{i}* terminates, *P{i+1}* can obtain its needed resources, and so on
+
+Basic Facts:
+- If a system is in safe state => no deadlocks
+- If a system is in unsafe state => possibility of deadlock
+- Avoidance => ensure that a system will never enter an unsafe state
+
+### Avoidance Algorithms
+- Single instance of a resource type
+    - Use a resource-allocation graph
+- Multiple instances of a resource type
+    - Use the banker's algorithm
+
+### Resource-Allocation Graph Scheme
+- **Claim edge** *P{i} -> R{j}* indicated that process *P{j}* may request resource *R{j}*; represented by a dashed line
+- Claim edge converts to request edge when a process requests a resource
+- Request edge converted to an assignment edge when the resource is allocated to the process
+- When a resource is released by a process, assignment edge reconverts to a claim edge
+- Resources must be claimed *a priori* in the system
+
+- Suppose that process *P{i}* requests a resource *R{j}*
+- The request can be granted only if converting the request edge to an assignment edge does not result in the formation of a cycle in the resource allocation graph
+
+### Bankers Algorithm
+- Multiple instances
+- Each process must a priori claim maximum use
+- When a process requests a resource it may have to wait
+- When a process gets all its resources it must return them in a finite amount of time
+> Not assessable for exam
+
+## Deadlock Detection
+- Allow system to enter deadlock state
+- Detection algorithm
+- Recovery scheme
+
+### Single Instance of Each Resource Type
+- Maintain ~()wait-for~ graph
+    - Nodes are processes
+    - *P{i} -> P{j}* if *P{i}* is waiting for *P{j}*
+- Periodically invoke an algorithm that searches for a cycle in the graph. If there is a cycle, there exists a deadlock
+- An algorithm to detect a cycle in a graph requires an order of *n{{2}}* operations, where *n* is the number of vertices in the graph
+
+### Detection-Algorithm Usage
+- When, and how often, to invoke depends on:
+    - How often a deadlock is likely to occur?
+    - How many processes will need to be rolled back?
+        - one for each disjoint cycle
+- If detection algorithm is invoked arbitrarily, there may be many cycles in the resource graph and so we would not be able to tell which of the many deadlocked processes "caused" the deadlock
+
+### Recovery from Deadlock
+Process Termination:
+- Abort all deadlocked processes
+- Abort one process at a time until the deadlock cycle is eliminated
+- In which order should we choose to abort?
+    1. Priority of the process
+    1. How long process has computed, and how much longer to completion
+    1. Resources that process has used
+    1. Resources process needs to complete
+    1. How many processes will need to be terminated
+    1. Is process interactive or batch?
+
+Resource Preemption:
+- ~()Selecting a victim~ -- minimize cost
+- ~()Rollback~ -- return to some safe state, restart process for that state
+- ~()Starvation~ -- same process may always be picked as victim, include number of rollback in cost factor
