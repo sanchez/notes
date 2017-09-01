@@ -1,6 +1,6 @@
 ---
 author: Daniel Fitz
-title: ENGG2800 Lecture Notes
+title: COMP3301 Lecture Notes
 alt-name: 43961229
 logo: /home/sanchez/Documents/logo.jpg
 school: University Of Queensland
@@ -1178,4 +1178,268 @@ $$$
 - Or APIs to modify priorities
 - But again environments vary
 
-# Next Chap here
+# Process Synchronization
+- To introduce the critical-section problem, whose solutions can be used to ensure the consistency of shared data
+- To present both software and hardware solutions of the critical-section problem
+- To examine several classical process-synchronization problems
+- To explore several tools that are used to solve process synchronization problems
+
+## Background
+- Processes can execute concurrently
+    - May be interrupted at any time, partially completing execution
+- Concurrent access to shared data may result in data consistency
+- Maintaining data consistency requires mechanisms to ensure the orderly execution of cooperating processes
+
+## The Critical-Section Problem
+- Consider system of *n* processes *\{p{0}, p{1}, ... p{n-1}\}*
+- Each process has **critical section** segment of code
+    - Process may be changing common variables, updating table, writing file, etc
+    - When one process in critical section, no other may be in its critical section
+- ~()Critical section problem~ is to design protocol to solve this
+- Each process must ask permission to enter critical section in **entry section**, may follow critical section with **exit section**, then **remainder section**
+
+### Critical Section
+General structure for a process:
+```
+do \{
+    ~()entry section~
+    critical section
+    ~()exit section~
+    remainder section
+\} while (true);
+```
+
+### Solution to Critical-Section Problem
+1. **Mutual Exclusion** -- If process *p{i}* is executing in its critical section, then no other processes can be executing in their critical sections
+1. **Progress** -- If no process is executing in its critical section and there exist some processes that wish to enter their critical section, then the selection of the processes that will enter the critical section next cannot be postponed indefinitely
+1. **Bounded Waiting** -- A bound must exist on the number of times that other processes are allowed to enter their critical sections after a process has made a request to enter its critical section and before that request is granted
+    - Assume that each process executes at a nonzero speed
+    - No assumption concerning ~()relative speed~ of the *n* processes
+- Two approaches depending on if kernel is preemptive or non-preemptive
+    - **Preemptive** -- allows preemption of process when running in kernel mode
+    - **Non-preemptive** -- runs until exits kernel mode, blocks, or voluntarily yields CPU
+        - Essentially free of race conditions in kernel mode
+
+## Petersons Solution
+- Good algorithmic description of solving the problem
+- Two process solution
+- Assume that the `load` and `store` instructions are atomic; that is, cannot be interrupted
+- The two processes share two variables:
+    - `int turn;`
+    - `bool flag[2];`
+- The variable `turn` indicates whose turn it is to enter the critical section
+- The `flag` array is used to indicate if a process is ready to enter the critical section. `flag[i] = true` implies that process `p{i}` is ready
+
+### Algorithm for Process Pi
+```
+do {
+    ~()flag[i] = true;~
+    ~()turn = j;~
+    ~()while (flag[j] && turn == j);~
+    critical section
+    ~()flag[i] = false;~
+    remainder section
+} while (true);
+```
+- Provable that
+    1. Mutual exclusion is preserved
+    1. Progress requirement is satisfied
+    1. Bounded-waiting requirement is met
+
+## Synchronization Hardware
+- Many systems provide hardware support for critical section code
+- All solutions below based on idea of **locking**
+    - Protecting critical regions via locks
+- Uniprocessors -- could disable interrupts
+    - Currently running code would execute without preemption
+    - Generally too inefficient on multiprocessor systems
+        - Operating systems using this not broadly scalable
+- Modern machines provide special atomic hardware instructions
+> Atomic = non-interruptible
+    - Either test memory word and set value
+    - Or swap contents of two memory words
+
+## Mutex Locks
+- Previous solutions are complicated and generally inaccessible to application programmers
+- OS designers build software tools to solve critical section problems
+- Simplest is mutex lock
+- Product critical regions with it by first `acquire()` a lock then `release()` it
+    - Boolean variable indicating if lock is available or not
+- Calls to `acquire()` and `release()` must be atomic
+    - Usually implemented via hardware atomic instructions
+- But this solution requires **busy waiting**
+    - This lock therefore called a **spinlock**
+    - Can be OK for short waits on a multi-processor system
+
+## Semaphore
+- Synchronization tool that does not require busy waiting
+- Semaphore *S* -- integer variable
+- Two standard operations modify *S*: `wait()` and `signal()`
+    - Originally called `P()` and `V()`. The inventor of semaphores was Edsger Dijkstra who was very Dutch. **P** and **V** are the first letters of two Dutch words *proberen* (to test) and *verhogen* (to increment).
+- Less complicated
+- Can only be accessed via two indivisible (atomic) operations
+
+### Semaphore Usage
+- **Counting semaphore** -- integer value can range over an unrestricted domain
+- **Binary semaphore** -- integer value can range only between 0 and 1
+    - Then a **mutex lock**
+- Can implement a counting semaphore *S* as a binary semaphore
+- Can solve various synchronization problems
+- Consider **P{1}** and **P{2}** that require **S{1}** to happen before **S{2}**
+
+### Semaphore Implementation
+- Must guarantee that no two processes can execute `wait()` and `signal()` on the same semaphore at the same time
+- Thus, implementation becomes the critical section problem where the wait and signal code are placed in the critical section
+    - Could now have **busy waiting** in critical section implementation
+        - But implementation code is short
+        - Little busy waiting if critical section rarely occupied
+- Note that applications may spend lots of time in critical sections and therefore this is not a good solution
+
+### Semaphore Implementation with no Busy waiting
+- With each semaphore there is an associated waiting queue
+- Each entry in a waiting queue has two data items:
+    - value (of type integer)
+    - pointer to next record in the list
+- Two operations:
+    - **block** -- place the process invoking the operation on the appropriate waiting queue
+    - **wakeup** -- remove one of processes in the waiting queue and place it in the ready queue
+
+### Deadlock and Starvation
+- **Deadlock** -- two or more processes are waiting indefinitely for an event that can be caused by only one of the waiting processes
+- **Starvation** -- ~()indefinite blocking~
+    - A process may never be removed from the semaphore queue in which it is suspended
+- **Priority Inversion** -- Scheduling problem when lower-priority process holds a lock needed by higher-priority process
+    - Solved via ~()priority-inheritance protocol~
+
+## Classic Problems of Synchronization
+- Classical problems used to test newly-proposed synchronization schemes
+
+### Bounded-Buffer Problem
+- *n* buffers, each can hold one item
+- Semaphore `mutex` initialized to the value 1
+- Semaphore `full` initialized to the value 0
+- Semaphore `empty` initialized to the value *n*
+- The structure of the producer process
+```
+do {
+    // produce an item in next_produced
+
+    wait(empty);
+    wait(mutex);
+
+    // add next produced to the buffer
+
+    signal(mutex);
+    signal(full);
+} while (true);
+```
+- The structure of the consumer process
+```
+do {
+    wait(full);
+    wait(mutex);
+
+    // remove an item from buffer to next_consumed
+
+    signal(mutex);
+    signal(empty);
+
+    // consume the item in next consumed
+} while (true);
+```
+
+### Readers-Writers Problem
+- A data set is shared among a number of concurrent processes
+    - Readers -- only read the data set; they do *not* perform any updates
+    - Writers -- can both read and write
+- Problem -- allow multiple readers to read at the same time
+    - Only one single writer can access the shared data at the same time
+- Several variations of how readers and writers are treated -- all involve priorities
+- Shared Data 
+    - Data set
+
+Readers-Writers Problem Variations
+===
+- First variation -- no reader kept waiting unless writer has permission to use shared object
+- Second variation -- once writer is ready, it performs write asap
+- Both may have starvation leading to even more variations
+- Problem is solved on some systems by kernel providing reader-writer locks
+
+### Dining-Philosophers Problem
+- Philosophers spend their lives thinking and eating
+- Don't interact with their neighbours, occasionally try to pick up 2 chopsticks (one at a time) to eat from bowl
+    - Need both to eat, then release both when done
+- In the case of 5 philosophers
+    - Shared data
+        - Bowl of rice (data set)
+        - Semaphore `chopstick[5]` initialized to 1
+
+## Problems with Semaphores
+- Incorrect use of semaphore operations:
+    - `signal (mutex)` ... `wait (mutex)`
+    - `wait (mutex)` ... `wait (mutex)`
+    - Omitting of `wait(mutex)` or `signal(mutex)` (or both)
+- Deadlock and starvation
+
+## Monitors
+- A high-level abstraction that provides a convenient and effective mechanism for process synchronization
+- *Abstract data type*, internal variables only accessible by code within the procedure
+- Only one process may be active within the monitor t a time
+- But not powerful enough to model some synchronization schemes
+```
+monitor monitor-name {
+    // shared variable declarations
+    procedure P1 (...) {
+        ...
+    }
+
+    procedure P2 (...) {
+        ...
+    }
+
+    Initialization code (...) {
+        ...
+    }
+}
+```
+
+### Condition Variables
+- `condition x, y;`
+- Two operations on a condition variable:
+    - `x.wait()` -- a process that invokes the operation is suspended until `x.signal()`
+    - `x.signal()` -- resumes one of processes (if any) that invoked `x.wait()`
+        - If no `x.wait()` on the variable, then it has no effect on the variable
+
+### Condition Variables Choices
+- If process *P* invokes `x.signal()`, with *Q* in `x.wait()` state, what should happen next?
+    - If *Q* is resumed, then *P* must wait
+- Options include 
+    - ~()Signal and wait~ -- *P* waits until *Q* leaves monitor or waits for another condition
+    - ~()Signal and continue~ -- *Q* waits until *P* leaves the monitor or waits for another condition
+
+    - Both have pros and cons -- language implmenter can decide
+    - Monitors implmented in Concurrent Pascal compromise
+        - P executing signal immediately leaves the monitor, Q is resumed
+    - Implemented in other languages including Mesa, C#, Java
+
+## Linux Synchronisation
+- Linux:
+    - Prior to kernel version 2.6, disables interrupts to implement short critical sections
+    - Version 2.6 and later, fully preemptive
+- Linux provides:
+    - atomic integers (set, add, sub, inc, read)
+    - mutex locks
+    - semaphores
+    - spinlocks
+    - reader-writer versions of both
+- On single-CPU system, spinlocks replaced by enabling and disabling kernel preemption (i.e. disabling interrupts)
+
+## Atomic Transactions
+- Assures that operations happen as a single logical unit of work, in its entirety, or not at all
+- Related to field of database systems
+- Challenge is assuring atomicity despite computer system failures
+- Must also work with multiple concurrent clients
+- Approaches -- see textbook for more detail if needed
+    - Log-based Recovery
+    - Checkpoints
+    - Concurrent Atomic Transactions
