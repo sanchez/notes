@@ -2288,3 +2288,249 @@ for (i = 0; i < 128; i++) {
 - **I/O interlock** -- Pages must sometimes be locked into memory
 - Consider I/O -- Pages that are used for copying a file from a device must be locked from being selected for eviction by a page replacement algorithm
 - **Pinning** of pages to lock into memory
+
+# Mass-Storage System
+- To describe the physical structure of secondary storage devices and its effects on the uses of the devices
+- To explain the performance characteristics of mass-storage devices
+- To evaluate disk scheduling algorithms
+- To discuss operating-system services provided for mass storage, including RAID
+
+## Overview of Mass Storage Structure
+- **Magnetic disks** provide bulk of secondary storage of modern computers
+    - Drives rotate at 60 to 250 times per second
+    - ~()Transfer rate~ is rate at which data flow between drive and computer
+    - ~()Positioning time~ (~()random-access time~) is time to move disk arm to desired cylinder (~()seek time~) and time for desired sector to rotate under the disk head (~()rotational latency~)
+    - ~()Head crash~ results from disk head making contact with the disk surface
+        - That's bad
+- Disks can be removable
+- Drive attached to computer via **I/O bus**
+    - Busses vary, including EIDE, ATA, SATA, USB, Fibre Channel, SCSI, SAS, Firewire
+    - **Host controller** in computer uses bus to talk to **disk controller** built into drive or storage array
+
+### Magnetic Disks
+- Platters range from .85" to 14" (historically)
+    - Commonly 3.5", 2.5" and 1.8""
+- Range from 30GB to 3TB per drive
+- Performance
+    - Transfer rate: 6Gb/s
+    - Effective transfer: 1Gb/s
+    - Seek time 3ms to 12ms (9ms common)
+    - Average seek time measured or calculated based on 1/3 of tracks
+    - Latency based on spindle speed
+        - 1/ (RPM / 60) = 60 / RPM
+    - Average latency = 1/2 latency
+
+### Solid-State Disks
+- Nonvolatile memory used like a hard drive
+    - Many technology variations
+- Can be more reliable than HDDs
+- More expensive per MB
+- Maybe have shorter life span
+- Less capacity
+- But much faster
+- Busses can be too slow -> connect directly to PCI for example
+- No moving parts, so no seek time or rotational latency
+
+### SSHD
+- Solid State Hybrid Drives, e.g. Apple Fusion drive
+- Incorporate Flash Drive and Magnetic Disk Drive
+- May use Flash as a cache, or else may be two separate drives with one interface
+- Reduced power consumpton for laptops
+- May be manual or automatic configuration (e.g. OS moves commonly used files to SSD)
+
+### Magnetic Tape
+- Was early secondary-storage medium
+    - Evolved from open spools to cartridges
+- Relatively permanent and holds large quantities of data
+- Access time slow
+- Random access ~1000 times slower than disk
+- Mainly used for backup, storage of infrequently-used data, transfer medium between systems
+- Kept in spool and wound or rewound past read-write head
+- Once data under head, transfer rates comparable to disk
+    - 140MB/s and greater
+- 200GB to 1.5TB typical storage
+- Robot tape drives can store and access thousands of tapes, with multi-second latency
+
+## Disk Structure
+- Disk drives are addressed as large 1-dimensional arrays of ~()logical blocks~, where the logical block is the smallest unit of transfer
+    - Low-level formatting creates ~()logical blocks~ on physical media
+- The 1-dimensional array of logical blocks is mapped into the sectors of the disk sequentially
+    - Sector 0 is the first sector of the first track on the outermost cylinder
+    - Mapping proceeds in order through that track, then the rest of the tracks in the cylinder, and then through the rest of the cylinders from outermost to innermost
+    - Logical to physical address should be easy
+        - Except for bad sectors
+        - Non-constant number of sectors per track via constant angular velocity
+- Older disks would allow physical addressing (Cylinder Number, Sector Number, Head Number), but most disks now only have (linear) logical addressing. This means the OS does not know exactly where a disk block is located
+
+## Disk Attachment
+- Host-attached storage accessed through I/O ports talking to I/O busses
+- SCSI itself is a bus, up to 16 devices on one cable, ~()SCSI initiator~ requests operation ad ~()SCSI targets~ perform tasks
+    - Each target can have up to 8 ~()logical units~ (disks attached to device controller)
+- FC (Fibre Channel) is high-speed serial architecture
+    - Can be switched fabric with 24-bit address space -- the basis of ~()storage are networks~ (~()SANs~) in which many hosts attach to many storage units
+- I/O directed to bus ID, device ID, logical unit (LUN)
+
+### Storage Array
+- Can just attach disks, or arrays of disks
+- Storage Array has controller(s), provides features to attached host(s)
+    - Ports to connect hosts to array
+    - Memory, controlling software (sometimes NVRAM, etc)
+    - A few to thousands of disks
+    - RAID, hot spares, hot swap (discussed later)
+    - Shared storage -> more efficiency
+    - Features found in some file systems
+        - Snapshots, clones, thin provisioning, replication, deduplication, etc
+
+### Storage Area Network
+- Common in large storage environments
+- Multiple hosts attached to multiple storage arrays - flexible
+![Storage Area Network](sem2-2017/comp3301/san.png)[75]
+- SAN is one or more storage arrays
+    - Connected to one or more Fibre Channel switches
+- Hosts also attach to the switches
+- Storage made available via ~()LUN (Logical Unit Number) Masking~ from specific arrays to specific servers
+- Easy to add or remove storage, add new host and allocate it storage
+    - Over low-latency Fibre Channel fabric
+
+### Network-Attached Storage
+- Network-attached storage (**NAS**) is storage made available over a network rather than over a local connection (such as a bus)
+- NFS (Network File System) and CIFS (Common Internet File System) are common protocols
+- Implemented via remote procedure calls (RPCs) between host and storage over typically TCP or UDP on IP network
+- ~()iSCSI~ protocol uses IP network to carry the SCSI protocol
+    - Remotely attaching to devices (blocks)
+
+## Disk Scheduling
+- The operating system is responsile for using hardware efficiently -- for the disk drives, this means having a fast access time and disk bandwidth
+- Minimize seek time
+- Seek time = seek distance
+- Disk **bandwidth** is the total number of bytes transferred, divided by the total time between the first request for service and the completion of the last transfer
+- There are many sources of disk I/O request
+    - OS
+    - System processes
+    - Users processes
+- I/O request includes input or output mode, disk address, number of sectors to transfer
+- OS maintains queue of requests, per disk or device
+- Idle disk can immediately work on I/O request, busy disk means work must queue
+    - Optimization algorithms only make sense when a queue exists
+- Note that drive controllers have small buffers and can manage a queue of I/O requests (of varying "depth")
+- Several algorithms exist to schedule the servicing of disk I/O requests
+- The analysis is true for one or many platters
+- We illustrate scheduling algorithms with a request queue (0-199)
+
+### FCFS
+Obvious
+
+### SSTF
+- **Shortest Seek Time First** selects the request with the minimum seek time from the current head position
+- SSTF scheduling is a form of SJF scheduling; may cause starvation of some requests
+
+### SCAN
+- The disk arm starts at one end of the disk, and moves toward the other end, servicing requests until it gets to the other end of the disk, where the head movement is reversed and servicing continues
+- ~()SCAN algorithm~ sometimes called the ~()elevator algorithm~
+
+### C-SCAN
+- Provides a more uniform wait time than SCAN
+- The head moves from one end of the disk to the other, servicing as it goes
+    - When it reaches the other end, however, it immediately returns to the beginning of the disk, without servicing any requests on the return trip
+- Treats the cylinders as a circular list that wraps around from the last cylinder to the first one
+
+### C-Look
+- LOOK a version of SCAN, C-LOOK a version of C-SCAN
+- Arm only goes as far as the last request in each direction, then reverses direction immediately, without first going all the way to the end of the disk
+
+### Selecting a Disk-Scheduling Algorithm
+- SSTF is common and has a natural appeal
+- SCAN and C-SCAN perform better for systems that place a heavy load on the disk
+    - Less starvation
+- Performance depends on the number and types of requests
+- Requests for disk service can be influenced by the file-allocation method
+    - And metadata layout
+- The disk-scheduling algorithm should be written as a separate module of the operating system, allowing it to be replaced with a different algorithm if necessary
+- Either SSTF or LOOK is a reasonable choice for the default algorithm
+- What about rotational latency?
+    - Difficult for OS to calculate
+- How does disk-based queueing effect OS queue ordering efforts?
+
+## Disk Management
+- **Low-level formatting** or **physcial formatting** -- Dividing a disk into sectors that the disk controller can read or write
+    - Each sector can hold header information, plus data, plus error correction code (**ECC**)
+    - Usually 512 bytes of data but can be selectable
+- To use a disk to hold files, the operating system still needs to record its own data structures on the disk
+    - **Partition** the disk into one or more groups of cylinders, each treated as a logical disk
+    - **Logical formatting** or "making a file system"
+    - To increase efficiency most file systems group blocks into **clusters**
+        - Disk I/O done in blocks
+        - File I/O done in clusters
+- Raw disk access for apps that want to do their own block management, keep OS out of the way (databases for example)
+- Boot block initializes system
+    - The bootstrap is stored in ROM
+    - ~()Bootstrap loader~ program stored in boot blocks of boot partition
+- Methods such as ~()sector sparing~ used to handle bad blocks
+
+## Swap-Space Management
+- Swap-space -- Virtual memory uses disk space as an extension of main memory
+    - Less common now due to memory capacity increases
+- Swap-space can be carved out of the normal file system, or, more commonly, it can be in a separate disk partition (raw)
+- Swap-space management
+    - 4.3BSD allocates swap space when process starts; holds text segment (the program) and data segment
+    - Kernel uses **swap maps** to track swap-space use
+    - Solaris 2 allocates swap space only when a dirty page is forced out of physical memory, not when the virtual memory page is first created
+        - File data written to swap space until write to file system requested
+        - Other dirty pages go to swap space due to no other home
+        - Text segment pages thrown out and reread from the file system as needed
+- What if a system runs out of swap space?
+- Some systems allow multiple swap spaces
+
+## RAID Structure
+- RAID -- redundant array of inexpensive disks
+    - multiple disk drives provides reliability via **redundancy**
+- Increases the ~()mean time to failure~
+- ~()Mean time to repair~ -- exposure time when another failure could cause data loss
+- ~()Mean time to data loss~ based on above factors
+- If mirrored disks fail independently, consider disk with 1,300,000 mean time to failure and 10 hour mean time to repair
+    - Mean time to data loss is 100,000{{2}} / (2x10), 57,000 years
+- Frequently combined with **NVRAM** to improve write performance
+- RAID is arranged into six different levels
+- Several improvements in disk-use techniques involve the use of multiple disks working cooperatively
+- Disk **striping** uses a group of disks as one storage unit
+- RAID schemes improve performance and improve the reliability of the storage system by storing redundant data
+    - **Mirror** or **shadowing** (~()RAID 1~) keeps duplicate of each disk
+    - Striped mirrors (~()RAID 1+0~) or mirrored stripes (~()RAID 0+1~) provides high performance and high reliability
+    - **Block interleaved parity** (~()RAID, 4, 5, 6~) uses much less redundancy
+- RAID within a storage array can still fail if the array fails, so automatic **replication** of the data between arrays is common
+- Frequently, a small number of ~()hot-spare~ disks are left unallocated, automatically replacing a failed disk and having data rebuilt onto them
+
+### Other Features
+- Regardless of where RAID implemented, other useful features can be added
+- **Snapshot** is a view of the file system before a set of changes take place (i.e. at a point in time)
+- Replication is automatic duplication of writes between separate sites
+    - For redundancy and disaster recovery
+    - Can be synchronous or asynchronous
+- Hot spare disk is unused, automatically used by RAID production if a disk fails to replace the failed disk and rebuild the RAID set if possible
+    - Decreases mean time to repair
+
+### Extensions
+- RAID alone does not prevent or detect data corruption or other errors, just disk failures
+- Solaris ZFS adds **checksums** of all data and metadata
+- Checksums kept with pointer to object, to detect if object is the right one and whether it changed
+- Can detect and correct data and metadata corruption
+- ZFS also removes volumes, partitions
+    - Disks allocated in ~()pools~
+    - Filesystems with a pool share that pool, use and release space like `malloc()` and `free()` memory allocate / release calls
+
+## Stable-Storage Implementation
+- Write-ahead log scheme requires stable storage
+- Stable storage means data is never lost (due to failure, etc)
+- To implement stable storage:
+    - Replicate information on more than one nonvolatile storage media with independent failure modes
+    - Update information in a controlled manner to ensure that we can recover the stable data after any failure during data transfer or recovery
+- Disk write has 1 of 3 outcomes
+    1. ~()Successful completion~ -- The data were written correctly on disk
+    1. ~()Partial failure~ -- A failure occurred in the midst of transfer, so only some of the sectors were written with the new data, and the sector being written during the failure may have been corrupted
+    1. ~()Total failure~ -- The failure occurred before the disk write started, so the previous data values on the disk remain intact
+- If failure occurs during block write, recovery procedure restores block to consistent state
+    - System maintains 2 physical blocks per logical block and does the following:
+        1. Write to 1{{st}} physical
+        1. When successful, write to 2{{nd}} physical
+        1. Declare complete only after second write completes successfully
+    - System frequently use NVRAM as one physical to accelerate
