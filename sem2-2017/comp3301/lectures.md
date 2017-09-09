@@ -2534,3 +2534,361 @@ Obvious
         1. When successful, write to 2{{nd}} physical
         1. Declare complete only after second write completes successfully
     - System frequently use NVRAM as one physical to accelerate
+
+# File-System Interface
+- To explain the function of file systems
+- To describe the interfaces to file systems
+- To discuss file-system design tradeoffs, including access methods, file sharing, file locking, and directory structures
+- To explore file-system protection
+
+## File Concept
+- Contiguous logical address space
+- Types:
+    - Data
+        - numeric
+        - character
+        - binary
+    - Program
+- Contents defined by file's creator
+    - Many types
+        - Consider ~()text file, source file, executable file~
+
+### File Attributes
+- **Name** -- only information kept in human-readable form
+- **Identifier** -- unique tag (number) identifies file within file system
+- **Type** -- needed for systems that support different types
+- **Location** -- pointer to file location on device
+- **Size** -- current file size
+- **Protection** -- controls who can do reading, writing, executing
+- **Time, data, and user identication** -- data for protection, security, and usage montioring
+- Information about files are kept in the directory structure, which is maintained on the disk
+- Many variations, including extended file attributes such as file checksum
+- Information kept in the directory structure
+
+### File Operations
+- File is an ~()abstract data type~
+- ~()Create~
+- ~()Write~ -- at write pointer location
+- ~()Read~ -- at read pointer location
+- ~()Reposition within file~ -- seek
+- ~()Delete~
+- ~()Truncate~
+- ~()Open(F{i})~ -- search the directory structure on disk for entry ~()F{i}~, and move the content of entry to memory
+- ~()Close(F{i})~ -- move the content of entry ~()F{i}~ in memory to directory structure on disk
+
+### Close
+- Several pieces of data are needed to manage open files:
+    - **Open-file table:** tracks open files
+    - **File pointer:** pointer to last read/write location, per process that has the file open
+    - **File-open count:** counter of number of times a file is open -- to allow removal of data from open-file table when last processes closes it
+    - **Disk location of the file:** cache of data access information
+    - **Access rights:** per-process access mode information
+
+### Open File Locking
+- Provided by some operating systems and file systems
+    - Similar to reader-writer locks
+    - **Shared lock** similar to reader lock -- several processes can acquire concurretly
+    - **Exclusive lock** similar to writer lock
+- Mediates access to a file
+- Mandatory or advisory
+    - **Mandatory** -- access is denied depending on locks held and requested
+    - **Advisory** -- processes can find status of locks and decide what to do
+
+### File Structure
+- None -- sequence of words, bytes
+- Simple record structure
+    - Lines
+    - Fixed length
+    - Variable length
+- Complex structures
+    - Formatted document
+    - Relocatable load file
+- Can simulate last two with first method by inserting appropriate control characters
+- Who decides
+    - Operating system
+    - Program
+
+## Access Methods
+- Sequential Access
+```
+read next
+write next
+reset
+```
+no read after last write (rewrite)
+- Direct Access -- file is fixed length ~()logical records~
+```
+read *n*
+write *n*
+position to *n*
+    read next
+    write next
+rewrite *n*
+```
+n = ~()relative block number
+- Relative block numbers allow OS to decide where file should be placed
+
+## Disk and Directory Structure
+### Directory Structure
+- A collection of nodes containing information about all files
+> Both directory structure and files reside on disk
+
+### Disk Structure
+- Disk can be subdivided into **partitions**
+- Disks or partitions can be **RAID** protected against failure
+- Disk or partition can be used **raw** -- without a file system, or **formatted** with a file system
+- Partitions also known as minidisks, slices
+- Entity containing file system known as a **volume**
+- Each volume containing file system also tracks that file system's info in **device directory** or **volume table of contents**
+- As well as **general-purpose file systems** there are many **special-purpose file systems**, frequently all within the same operating system or computer
+
+![A Typical File-system Organization](sem2-2017/comp3301/file.png)[75]
+
+### Operations Performed on Directory
+- Search for a file
+- Create a file
+- Delete a file
+- List a directory
+- Rename a file
+- Traverse the file system
+
+### Organize the Directory (Logically) to Obtain
+- Efficiency -- locating a file quickly
+- Naming -- convenient to users
+    - Two users an have same name for different files
+    - The same file can have several different names
+- Grouping -- logical grouping of files by properties, (e.g. all Java programs, all games, ...)
+
+## File Sharing
+- Sharing of files on multi-user systems is desirable
+- Sharing may be done through a **protection** scheme
+- On distributed systems, files may be shared across a network
+- Network File System (NFS) is a common distributed file-sharing method
+- If multi-user system
+    - **User IDs** identify users, allowing permissions and protections to be per-user
+    - **Group IDs** allow users to be in groups, permitting group access rights
+    - Owner of a file / directory
+    - Group of a file / directory
+
+### Remote File Systems
+- Uses networking to allow file system access between systems
+    - Manually via programs like FTP
+    - Automatically, seamlessly using **distributed file systems**
+    - Semi automatically via the **world wide web**
+- **Client-server** model allows clients to mount remote file systems from servers
+    - Server can serve multiple clients
+    - Client and user-on-client identification is insecure or complicated
+    - **NFS** is standard UNIX client-server file sharing protocol
+    - **CIFS** is standard Windows protocol
+    - Standard operating system file calls are translated into remote calls
+- Distributed Information Systems (**distributed naming services**) such as LDAP, DNS, NIS, Active Directory implement unified access to information needed for remote computing
+
+### Failure Modes
+- All file systems have failure modes
+    - For example corruption of directory structures or other non-user data, called **metadata**
+- Remote file systems add new failure modes, due to network failure, server failure
+- Recovery from failure can involve **state information** about status of each remote request
+- **Stateless** protocols such as NFS v3 include all information in each request, allowing easy recovery but less security
+
+## Protection
+- File owner/creator should be able to control:
+    - what can be done
+    - by whom
+- Types of access
+    - Read
+    - Write
+    - Execute
+    - Append
+    - Delete
+    - List
+
+### Access Lists and Groups
+- Mode of access: read, write, execute
+- Three classes of users on Unix/Linux
+    1. owner access -- 7
+    1. group access -- 6
+    1. public access -- 1
+- Ask manager to create a group (unique name), say G, and add some users to the group
+- For a particular file (say game) or subdirectory, define an appropriate access
+
+# File System Implementation
+- To describe the details of implementing local file systems and directory structures
+- To describe the implementation of remote file systems
+- To discuss block allocation and free-block algorithms and trade-offs
+
+## File-System Structure
+- File structure
+    - Logical storage unit
+    - Collection of related information
+- **File system** resides on secondary storage (disks)
+    - Provided user interface to storage, mapping logical to physcial
+    - Provides efficient and convenient access to disk by allowing data to be stored, located retrieved easily
+- Disk provides in-place rewrite and random access
+    - I/O transfers performed in **blocks** of **sectors** (usually 512 bytes)
+- **File control block** -- storage structure consisting of information about a file
+- **Device driver** controls the physical device
+- File system organized into layers
+
+### File System Layers
+- **Device drivers** manage I/O devices at the I/O control layer
+    - Given commands like "read drive1, cylinder 72, track 2, sector 10, into memory location 1060" outputs low-level hardware specific commands to hardware controller
+    - ~()Basic file system~ given command like "retrieve block 123" translates to device driver
+- Also manages memory buffers and caches (allocation, freeing, replacement)
+    - Buffers hold data in transit
+    - Caches hold frequently used data
+- **File organization module** understands files, logical address, and physical blocks
+    - Translates logical block number to physical block number
+    - Manages free space, disk allocation
+- **Logical file system** manages metadata information
+    - Translates file name into file number, file handle, location by maintaining file control bocks (~()inodes~ in Unix)
+    - Directory management
+    - Protection
+- Layering useful for reducing complexity and redundancy, but adds overhead and can decrease performance
+    - Logical layers can be implemented by any coding method according to OS designer
+- Many file systems, sometimes many within an operating system
+    - Each with its own format (CD-ROM is ISO 9660; Unix has ~()UFS~, FFS; Windows has FAT, FAT32 NTFS as well as floppy, CD, DVD Blu-ray, Linux has more than 40 types, with ~()extended file system~ ext2 and ext3 leading; plus distributed file systems, etc)
+    - New ones still arriving -- ZFS, GoogleFS, Oracle ASM, FUSE
+
+## File-System Implementation
+- We have system calls at the API level, but how do we implement their functions?
+    - On-disk and in-memory structures
+- **Boot control block** contains info needed by system to boot OS from that volume
+    - Needed if volume contains OS, usually first block of volume
+- **Volume control block** (~()superblock, master file table~) contains volume details
+    - Total number of blocks, number of free blocks, block size, free block pointers or array
+- Directory structure organizes the files
+    - Names and inode numbers, file file table
+- Per-file **File control block** (~()FCB~) contains many details about the file
+    - inode number, permissions, size dates
+
+### In-Memory File System Structures
+- Mount table storing file system mounts, mount points, file system types
+- The following figure illustrates the necessary file system structures provided by the operating systems
+- Figure a refers to opening a file
+- Figure b refers to reading a file
+- Plus buffers hold data blocks from secondary storage
+- Open returns a file handle for subsequent use
+- Data from read eventually copied to specific user process memory address
+
+![In-Memory File System Structures](sem2-2017/comp3301/structure.png)[75]
+
+## Directory Implementation
+- **Linear list** of file names with pointer to the data blocks
+    - Simple to program
+    - Time-consuming to execute
+        - Linear search time
+        - Could keep ordered alphabetically via linked list or use B+ tree
+- **Hash Table** -- linear list with hash data structure
+    - Decreases directory search time
+    - ~()Collisions~ -- situations where two file names hash to the same location
+    - Only good if entries are fixed size, or use chained-overflow method
+
+## Allocation Methods
+### Contiguous
+- An allocation method refers to how disk blocks are allocated for file
+- **Contiguous allocation** -- each file occupies set of contiguous blocks
+    - Best performance in most cases
+    - Simple -- only starting location (block number) and length (number of blocks) are required
+    - Problems include finding space for file, knowing file size, external fragmentation, need for ~()compaction off-line~ (~()downtime~) or ~()on-line~
+
+### Extent-Based Systems
+- Many newer file systems (i.e. Veritas File System) use a modified contiguous allocation scheme
+- Extent-based file systems allocate disk blocks in extents
+- An **extent** is a contiguous blocks of disks
+    - Extents are allocated for file allocation
+    - A file consists of one or more extents
+
+### Linked
+- **Linked allocation** -- each file a linked list of blocks
+    - File ends at nil pointer
+    - No external fragmentation
+    - Each block contains pointer to next block
+    - No compaction, external fragmentation
+    - Free space management system called when new block needed
+    - Improve efficiency by clustering blocks into groups but increases internal fragmentation
+    - Reliability can be a problem
+    - Locating a block can take many I/Os and disk seeks
+- FAT (File Allocation Table) variation
+    - Beginning of volume has table, indexed by block number
+    - Much like a linked list, but faster on disk and cacheable
+    - New block allocation simple
+
+### Indexed
+- **Indexed allocation** -- each file has its own ~()index block~(s) fo pointers to its data block
+- Need index table
+- Random access
+- Dynamic access without external fragmentation, but have overhead of index block
+- Mapping from logical to physical in a file of maximum size of 256K bytes and block size of 512 bytes. We need only 1 block for index table
+
+### Performance
+- Best method depends on file access type
+    - Contiguous great for sequential and random
+- Linked good for sequential, not random
+- Declare access type at creation -> select either contiguous or linked
+- Indexed more complex
+    - Single block access could require 2 index block reads then data block read
+    - Clustering can help improve throughput, reduce CPU overhead
+
+## Free-Space Management
+- File system maintains **free-space list** to track available blocks/clusters
+    - (Using term "block" for simplicity)
+- **Bit vector** or **bit map** (*n* blocks)
+- Grouping
+    - Modify linked list to store address of next *n-1* free blocks in first free block, plus a pointer to next block that contains free-block-pointers (like this one)
+- Counting
+    - Because space is frequently contiguously used and freed, with contiguous-allocation, extents, or clustering
+        - Keep address of first free block and count of following free blocks
+        - Free space list then has entries containing addresses and counts
+
+## Efficiency and Performance
+- Efficiency dependent on:
+    - Disk allocation and directory algorithms
+    - Types of data kept in file's directory entry
+    - Pre-allocation or as-needed allocation of metadata structures
+    - Fixed-size or varying-size data structures
+- Performance
+    - Keeping data and metadata close together
+    - **Buffer cache** -- separate section of main memory for frequently used blocks
+    - **Synchronous** writes sometimes requested by apps or needed by OS
+        - No buffering / caching -- writes must hit disk before acknowledgement
+        - ~()Asynchronous~ writes more common, buffer-able, faster
+    - ~()Free-behind~ and ~()read-ahead~ -- techniques to optimize sequential access
+    - Reads frequently slower than writes
+
+## Recovery
+- **Consistency checking** -- compares data in directory structure with data blocks on disk, and tries to fix inconsistencies
+    - Can be slow and sometimes fails
+- Use system programs to ~()back up~ data from disk to another storage device (magnetic tape, other magnetic disk, optical)
+- Recover lost file or disk by **restoring** data from backup
+
+### Log Structured File Systems
+- **Log structured** (or **journaling**) file systems record each metadata update to the file system as a **transaction**
+- All transactions are written to a log
+    - A transaction is considered committed once it is written to the log (sequentially)
+    - Sometimes to a separate device or section of disk
+    - However, the file system may not yet be updated
+- The transactions in the log are asynchronously written to the file system structures
+    - When the file system structures are modified, the transaction is removed from the log
+- If the file system crashes, all remaining transactions in the log must still be performed
+- Faster recovery from crash, removes chance of inconsistency of metadata
+
+## NFS
+- An implementation and a specification of a software system for accessing remote files across LANs (or WANs)
+- The implementation is part of the Solaris and SunOS operating systems running on Sun workstations using an unreliable datagram protocol (UDP/IP protocol and Ethernet)
+- NFS is designed to operate in a heterogeneous environment of different machines, operating systems, and network architectures; the NFS specifications independent of these media
+- The independence is achieved through the use of RPIC primitives built on top of an External Data Representation (XDR) protocol used between two implementation-independent interfaces
+- The NFS specification distinguishes between the services provided by a mount mechanism and the actual remote-file-access services
+- NFS is designed to operate in a heterogeneous environment of different machines, operating systems, and network architectures; the NFS specifications independent of these media
+- This independence is achieved through the use of RPC primitives built on top of an External Data Representation (XDR) protocol used between two implementation-independent interfaces
+- The NFS specification distinguishes between the services provided by a mount mechanism and the actual remote-file-access services
+
+### NFS Protocol
+- Provides a set of remote procedure calls for remote file operations. The procedures support the following operations:
+    - searching for a file within a directory
+    - reading a set of directory entries
+    - manipulating links and directories
+    - accessing file attributes
+    - reading and writing files
+- NFS servers are ~()stateless~; each request has to provide a full set of arguments (NFS V4 is just coming available -- very different, stateful)
+- Modified data must be committed to the server's disk before results are returned to the client (lose advantages of caching)
+- The NFS protocol does not provide concurrency-control mechanisms
