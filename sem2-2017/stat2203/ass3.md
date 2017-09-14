@@ -39,3 +39,43 @@ S&=X\cap(Y\cup Z)\\
 &= e^{\frac{8}{15}s}+e^{\frac{8}{15}s} - e^{\frac{13}{15}s}\\
 &= 2e^{\frac{8}{15}s} - e^{\frac{13}{15}s}
 $$$
+
+# Question 3
+## Part A
+Set F(x) to be one and measure the area under the curve
+$$$
+F(x) &= \int_0^{\frac{1}{2}}\alpha(1-x) dx\\
+&=\int_0^{\frac{1}{2}}\alpha\quad dx-\int_0^{\frac{1}{2}}\alpha x\quad dx\\
+&=\left[\alpha x - \alpha\frac{x^2}{2}\right]_0^{\frac{1}{2}}\\
+1 &= \frac{\alpha}{2} - \frac{\alpha}{8}\\
+&= \alpha\frac{3}{8}\\
+\alpha &= \frac{8}{3}
+$$$
+
+## Part B
+$$$
+\mathbb{P}\left(\frac{1}{3} < X < \frac{1}{2}\right) &= \int_\frac{1}{3}^\frac{1}{2} \frac{8}{3}(1-x)\quad dx\\
+&= \frac{8}{3}\int_\frac{1}{3}^\frac{1}{2} (1-x)\quad dx\\
+&= \frac{8}{3}\left[x-\frac{x^2}{2}\right]_\frac{1}{3}^\frac{1}{2}\\
+&= \frac{8}{3}\left(\left(\frac{3}{8}\right) - \left(\frac{1}{3} - \frac{1}{12}\right)\right)\\
+&= \frac{8}{3}\left(\frac{3}{8}-\frac{1}{4}\right)\\
+&= \frac{8}{3}\frac{1}{8}\\
+&= \frac{1}{3}
+$$$
+
+# Question 4
+## Part A
+The variance of an Exp is
+$$$
+\frac{1}{\lambda^2}
+$$$
+Therefore since lambda is 1, the variance is 1
+
+## Part B
+$$$
+Var(Z_n) &= Var\left( \frac{X_1+\ldots+X_n - \mathbb{E}(X_1+\ldots+X_n)}{\sqrt{Var(X_1+\ldots+X_n)}} \right)\\
+&= Var\left( \frac{1}{\sqrt{n}}(X_1+\ldots+X_n) - \frac{n}{\sqrt{n}} \right)\\
+&= \frac{Var(X_1+\ldots+X_n)}{n} \tag{$a^2 Var(X) = Var(aX + b)$}\\
+&= \frac{n}{n}\\
+&= 1
+$$$
