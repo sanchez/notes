@@ -2892,3 +2892,250 @@ n = ~()relative block number
 - NFS servers are ~()stateless~; each request has to provide a full set of arguments (NFS V4 is just coming available -- very different, stateful)
 - Modified data must be committed to the server's disk before results are returned to the client (lose advantages of caching)
 - The NFS protocol does not provide concurrency-control mechanisms
+
+# I/O Systems
+- I/O management is a major component of operating system design and operation
+    - Important aspect of computer operation
+    - I/O devices vary greatly
+    - Various methods to control them
+    - Performance management
+    - New types of devices frequent
+- Ports, busses, device controllers connect to various devices
+- **Device drivers** encapsulate device details
+    - Present uniform device-access interface to I/O subsystem
+
+## I/O Hardware
+- Incredible variety of I/O devices
+    - Storage
+    - Transmission
+    - Human-interface
+- Common concepts -- signals from I/O devices interface with computer
+    - **Port** -- connection point for device
+    - **Bus - daisy chain** or shared direct access
+        - **PCI** bus common in PCs and servers, PCI Express (**PCIe**)
+        - **expansion bus** connects realtively slow devices
+    - **Controller** (~()host adapter~) -- electronics that operate port, bus, device
+        - Sometimes integrated
+        - Sometimes separate circuit board (host adapter)
+        - Contains processor, microcode, private memory, bus controller, etc
+            - Some talk to per-device controller with bus controller
+- I/O instructions control devices
+- Devices usually have registers where device driver places commands, addresses, and data to write, or read data from registers after command execution
+    - Data-in register, data-out register, status register, control register
+    - Typically 1-4 bytes, or FIFO buffer
+- Devices have addresses, used by
+    - Direct I/O instructions
+    - **Memory-mapped I/O**
+        - Device data and command registers mapped to process address space
+        - Especially for large address spaces (graphics)
+
+### Polling
+- For each byte of I/O
+    1. Read busy bit from status register until 0
+    1. Host sets read or write bit and if write copies data into data-out register
+    1. Host sets command-ready bit
+    1. Controller sets busy bit, executes transfer
+    1. Controller clears busy bit, error bit, command-ready bit when transfer done
+- Step 1 is **busy-wait** cycle to wait for I/O from device
+    - Reasonable if device is fast
+    - But inefficient if device slow
+    - CPU switches to other tasks?
+        - But if miss a cycle data overwritten / lost
+
+### Interrupts
+- Polling can happen in 3 instruction cycles
+    - Read status, logical-and to extract status bit, branch if not zero
+    - How to be more efficient if non-zero infrequently?
+- CPU **Interrupt-request line** triggered by I/O device
+    - Checked by processor after each instruction
+- **Interrupt handler** receives interrupts
+    - **Maskable** to ignore or delay some interrupts
+- **Interrupt vector** to dispatch interrupt to correct handler
+    - Context switch at start and end
+    - Based on priority
+    - Some ~()nonmaskable~
+    - Interrupt chaining if more than one device at same interrupt number
+- Interrupt mechanism also used for **exceptions**
+    - Terminate process, crash system due to hardware error
+- Page fault executes when memory access error
+- System call executes via **trap** to trigger kernel to execute request
+- Multi-CPU systems can process interrupts concurrently
+    - If operating system designed to handle it
+- Used for time-sensitive processing, frequent, must be fast
+
+### Direct Memory Access
+- Used to avoid ~()programmed I/O~ (one byte at a time) for large data movement
+- Requires **DMA** controller
+- Bypasses CPU to transfer data directly between I/O device and memory
+- OS writes DMA command block into memory
+    - Source and destination addresses
+    - Read or write mode
+    - Count of bytes
+    - Writes location of command block to DMA controller
+    - Bus mastering of DMA controller -- grabs bus from CPU
+        - **Cycle stealing** from CPU but still much more efficient
+    - When done, interrupts to signal completion
+- Version that is aware of virtual addresses can be even more efficient -- **DVMA**
+
+## Application I/O Interface
+- I/O system calls encapsulate device behaviours in generic classes
+- Device-driver layer hides differences among I/O controllers from kernel
+- New devices talking already-implemented protocols need no extra work
+- Each OS has its own I/O subsystem structures and device driver frameworks
+- Devices vary in many dimensions
+    - ~()Character-stream~ or ~()block~
+    - ~()Sequential~ or ~()random-access~
+    - ~()Synchronous~ or ~()asynchronous~ (or both)
+    - ~()Sharable~ or ~()dedicated~
+    - ~()Speed of operation~
+    - ~()read-write, read only, or write only~
+
+## Kernel I/O Subsystem
+### Characteristics of I/O Devices
+| Aspect | Variation | Example
+| --- | --- | --- |
+| data-transfer mode | character | terminal
+| | block | disk
+| access method | sequential | modem
+| | random | CD-ROM
+| transfer schedule | synchronous | tape
+| | asynchronous | keyboard
+| device speed | latency |
+| | seek time |
+| | transfer rate |
+| | delay between operations |
+| I/O direction | read only | CD-ROM
+| | write only | graphics controller
+| | read-write | disk
+
+- Subtleties of devices handled by device drivers
+- Broadly I/O devices can be grouped by the OS into
+    - Block I/O
+    - Character I/O (Stream)
+    - Memory-mapped file access
+    - Network sockets
+- For direct manipulation of I/O device specific characteristics, usually an escape / back door
+    - Unix `ioctl()` call to send arbitrary bits to a device control register and data to device data register
+
+### Block and Character Devices
+- Block devices include disk devices
+    - Commands include read, write, seek
+    - **Raw I/O, direct I/O,** or file-system access
+    - Memory-mapped file access possible
+        - File mappped to virtual memory and clusters brought via demand paging
+    - DMA
+- Character devices include keyboards, mice, serial ports
+    - Commands include `get()`, `put()`
+    - Libraries layered on top allow line editing
+
+### Network Devices
+- Varying enough from block and character to have own interface
+- Linux, Unix, Windows and many others include **socket** interface
+    - Separates network protocol from network operation
+    - Includes `select()` functionality
+- Approaches vary widely (pipes, FIFOs, streams, queues, mailboxes)
+
+### Clocks and Timers
+- Provide current time, elapsed time, timer
+- Normal resolution about 1/60 second
+- Some systems provide higher-resolution timers
+- **Programmable interval timer** used for timings, periodic interrupts
+- `ioctl()` (on Unix) covers odd aspects of I/O such as clocks and timers
+
+### Nonblocking and Asynchronous I/O
+- **Blocking** -- process suspended until I/O completed
+    - Easy to use and understand
+    - Insufficient for some needs
+- **Nonblocking** -- I/O call returns as much as available
+    - User interface, data copy (buffered I/O)
+    - Implmented via multi-threading
+    - Returns quickly with count of bytes read or written
+    - `select()` to find if data ready then `read()` or `write()` to transfer
+- **Asynchronous** -- process runs while I/O executes
+    - Difficult to use
+    - I/O subsystem signals process when I/O completed
+
+### Vectored I/O
+- **Vectored I/O** allows one system call to perform multiple I/O operations
+- For example, Unix `readve()` accepts a vector of multiple buffers to read into or write from
+- This scatter-gather method better than multiple individual I/O calls
+    - Decreases context switching and system call overhead
+    - Some versions provide atomicity
+        - Avoid for example worry about multiple threads changing data as reads/writes occurring
+
+### Kernel I/O Subsystem
+- **Scheduling**
+    - Some I/O request ordering via per-device queue
+    - Some OSs try fairness
+    - Some implement Quality Of Service (i.e. IPQOS)
+- **Buffering** -- store data in memory while transferring between devices
+    - To cope with device speed mismatch
+    - To cope with device transfer size mismatch
+    - To maintain "copy semantics"
+    - **Double buffering** -- two copies of the data
+        - Kernel and user
+        - Varying sizes
+        - Full / being processes and not-full/being used
+- **Caching** -- faster device holding copy of data
+    - Always just a copy
+    - Key to performance
+    - Sometimes combined with buffering
+- **Spooling** -- hold output for a device
+    - If device can serve only one request at a time
+    - i.e. Printing
+- **Device reservation** -- provides exclusive access to a device
+    - System calls for allocation and de-allocation
+    - Watch out for deadlock
+
+### I/O Protection
+- User process may accidentally or purposefully attempt to disrupt normal operation via illegal I/O instructions
+    - All I/O instructions defined to be privileged
+    - I/O must be performed via system calls
+        - Memory-mapped and I/O port memory locations must be protected too
+
+### Kernel Data Structures
+- Kernel keeps state info for I/O components, including open file tables, network connections, character device state
+- Many, many complex data structures to track buffers, memory allocation, "dirty" blocks
+- Some use object-oriented methods and message passing to implment I/O
+
+### Power Management
+- Not strictly domain of I/O, but much is I/O related
+- Computers and devices use electricity, generate heat, frequently require cooling
+- OSes can help manage and improve use
+- Mobile computing has power management as first class OS aspect
+- For example, Android implements
+    - Component-level power management
+        - Understands relationship between componenets
+        - Build device tree representing physical device topology
+        - System bus -> I/O subsystem -> \{flash, USB storage\}
+        - Device driver tracks state of device, whether in use
+        - Unused component -- turn it off
+        - All devices in tree branch unused -- turn off branch
+    - Wake locks -- like other locks but prevent sleep from device when lock is held
+    - Power collapse -- put a device into very deep sleep
+        - Marginal power use
+        - Only awake enough to respond to external stimuli (butten press, incoming call)
+
+## Transforming I/O Requests to Hardware Operations
+- Consider reading a file from disk for a process:
+    - Determine device holding file
+    - Translate name to device representation
+    - Physically read data from disk into buffer
+    - Make data available to requesting process
+    - Return control to process
+
+## Performance
+- I/O a major factor in system performance:
+    - Demands CPU to execute device driver, kernel I/O code
+    - Context switches due to interrupts
+    - Data copying
+    - Network traffic especially stressful
+
+### Improving Performance
+- Reduce number of context switches
+- Reduce data copying
+- Reduce interrupts by using large transfers, smart controllers, polling
+- Use DMA
+- Use smarter hardware devices
+- Balance CPU, memory, bus, and I/O performance for highest throughput
+- Move user-mode processes / daemons to kernel threads
