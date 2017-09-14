@@ -57,10 +57,10 @@ $$$
 \mathbb{P}\left(\frac{1}{3} < X < \frac{1}{2}\right) &= \int_\frac{1}{3}^\frac{1}{2} \frac{8}{3}(1-x)\quad dx\\
 &= \frac{8}{3}\int_\frac{1}{3}^\frac{1}{2} (1-x)\quad dx\\
 &= \frac{8}{3}\left[x-\frac{x^2}{2}\right]_\frac{1}{3}^\frac{1}{2}\\
-&= \frac{8}{3}\left(\left(\frac{3}{8}\right) - \left(\frac{1}{3} - \frac{1}{12}\right)\right)\\
-&= \frac{8}{3}\left(\frac{3}{8}-\frac{1}{4}\right)\\
-&= \frac{8}{3}\frac{1}{8}\\
-&= \frac{1}{3}
+&= \frac{8}{3}\left(\left(\frac{3}{8}\right) - \left(\frac{1}{3} - \frac{1}{18}\right)\right)\\
+&= \frac{8}{3}\left(\frac{3}{8}-\frac{5}{18}\right)\\
+&= \frac{8}{3}\frac{7}{72}\\
+&= \frac{7}{27}
 $$$
 
 # Question 4
@@ -79,3 +79,68 @@ Var(Z_n) &= Var\left( \frac{X_1+\ldots+X_n - \mathbb{E}(X_1+\ldots+X_n)}{\sqrt{V
 &= \frac{n}{n}\\
 &= 1
 $$$
+
+# Question 5
+```
+function result = ass3q5
+  N=1e3;
+  numOfInsideRange = 0;
+  sumOfInsideRange = 0;
+  for i = 1:N
+    tempVal = outcome(rand);
+    if (tempVal > 1/3 && tempVal < 1/2)
+      numOfInsideRange++;
+      sumOfInsideRange += tempVal;
+    endif
+  endfor
+  avg = sumOfInsideRange/numOfInsideRange
+endfunction
+
+function result = outcome(y)
+  lambda = 8/3;
+  a = -lambda/2;
+  b = lambda;
+  c = -y;
+  result = (sqrt(b^2 - 4*a*c) - b)/(2*a);
+endfunction
+```
+
+The above code, when run, gives an approximate answer of 0.40
+
+# Question 6
+```
+function result = ass3q6
+  N=1e3;
+  results1 = 1:N;
+  results10 = 1:N;
+  for i = 1:N
+    results1(i) = simVariable(1);
+    results10(i) = simVariable(10);
+    results100(i) = simVariable(100);
+  endfor
+  subplot(3, 1, 1);
+  hist(results1, -4:.5:4);
+  title("Z = 1");
+  ylabel("Num of hits");
+  xlabel("x of Xn");
+  subplot(3, 1, 2);
+  hist(results10, -4:.5:4);
+  title("Z = 10");
+  ylabel("Num of hits");
+  xlabel("x of Xn");
+  subplot(3, 1, 3);
+  hist(results100, -4:.5:4);
+  title("Z = 100");
+  ylabel("Num of hits");
+  xlabel("x of Xn");
+endfunction
+
+function result = simVariable(n)
+  X = -log(rand(1, n));
+  Z = (sum(X) - n)/sqrt(n);
+  result = Z;
+endfunction
+```
+
+The above code outputs the following image:
+![Question 6 answer](sem2-2017/stat2203/ass3.q6.png)[100]
