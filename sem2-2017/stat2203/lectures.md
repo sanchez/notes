@@ -416,3 +416,122 @@ Therefore, we reject *H{0}* if our observed statistic *t* falls in *C{&alpha;}*
 ## Summary
 - Confidence intervals; definition, stochastic, numerical, approximate, examples
 - Hypothesis testing; decision rules, null and alternative hypotheses, Type I and II error, significance level, power, critical region, critical *p*-value, one- and two-sided regions (hence tests).
+
+# Confidence Intervals and Hypothesis Testing II
+## Sample Variance
+For a single normal random sample with known variance &sigma;{{2}}, we have seen that the ~()sample mean~ (X bar) is normally distributed, and can therefore construct confidence intervals and hypothesis tests for the unknown mean &mu;
+
+How can we proceed when &sigma;{{2}} is unknown?
+First, we will determine an appropriate ~()estimator~ for &sigma;{{2}}, and state its distribution for a normal random sample.
+
+Recall that we defined the ~()sample variance~ of data as
+$$$
+\hat{\sigma^2} = \frac{1}{N} \sum^N_{i=1} (x_i - \bar{x})^2 = \frac{1}{N} \sum^N_{i=1} x_i^2 - \bar{x}^2
+$$$
+For a ~()random sample~, is the associated random variable an ~()unbiased~ estimator for &sigma;{{2}}?
+We have
+$$$
+\mathbb{E}\hat{\sigma^2} &= \frac{1}{N}\sum^N_{i=1} \mathbb{E}[X_i^2] - \mathbb{E}[\bar{X}^2]\\
+&= \mathbb{E}[X_1^2] - \mathbb{E}\left[\left( \frac{1}{N}\sum^N_{i=1}X_i \right)^2\right]\\
+&= \mathbb{E}[X_1^2] - \mathbb{E}\left[ \frac{1}{N^2}\sum^N_{i=1}\sum^N_{j=1} X_i X_j \right]\\
+&= \mathbb{E}[X_1^2] - \frac{1}{N^2} \mathbb{E}\left[ \sum^N_{i=1}X_i^2+\sum^N_{i=1}\sum^N_{j=1,j\ne i} X_iX_j \right]\\
+&= \mathbb{E}[X_1^2] - \frac{1}{N} \mathbb{E}[X_1^2] - \frac{N(N-1)}{N^2} \mathbb{E}[X_1]^2\\
+&= \frac{N-1}{N}(\mathbb{E}[X_1^2] - \mathbb{E}[X_1]^2) = \frac{N-1}{N}\sigma^2
+$$$
+Therefore, &hat;&sigma;{{2}} is a biased (but ~()consistent~) estimator for &sigma;{{2}}.
+**Remark:** &hat;&sigma;{{2}} is the MLE of &sigma;{{2}} for a normal random sample.
+
+We can easily correct for the bias in the **(bias corrected) sample variance:**
+$$$
+S^2 &= \frac{N}{N-1}\hat{\sigma^2}\\
+&= \frac{1}{N-1}\sum^N_{i=1}(X_i - \bar{X})^2\\
+&= \frac{1}{N-1}\sum^N_{i=1}X_i^2 - \frac{N}{N-1}\bar{X}^2
+$$$
+For a normal random sample, it turns out that
+$$$
+(N-1)\frac{S^2}{\sigma^2} \tilde X^2_{N-1} \equiv \text{Gamma}(\frac{N-1}{2}, \frac{1}{2})
+$$$
+\ _f
+**Remark:** The fact that the ~()degrees of freedom~ is *N - 1* comes from the fact that there are only *N - 1* linearly independent elements of
+$$$
+\begin{pmatrix}
+X_1 - \bar{X}\\
+\cdot\\\cdot\\\cdot\\
+X_N - \bar{X}
+\end{pmatrix}
+$$$
+
+### Sample Variance Example
+**Example:** For a normal random sample *X{1}, ..., X{N} ~iid N(&mu;, &sigma;{{2}})* with unknown mean &mu; and variance &sigma;{{2}}, find a *1 - &alpha;* (stochastic) confidence interval for &sigma;{{2}}.
+Since *(N - 1)S{{2}}/&sigma;{{2}} ~ X{N-1}{{2}}*, we have by definition
+$$$
+\mathbb{P}\left( X^2_{N-1;\alpha/2} \leq (N-1)\frac{S^2}{\sigma^2} \leq X^2_{N-1;1-\alpha/2} \right) = 1-\alpha
+$$$
+where *X{N-1;&gamma;}{{2}}* denotes the &gamma;-quantile of this chi-squared distribution
+Since *&sigma;{{2}} > 0* and *S{{2}} > 0*, we rearrange as follows:
+$$$
+\mathbb{P}\left( \frac{1}{X^2_{N-1;\alpha/2}} \geq \frac{\sigma^2}{(N-1)S^2} \geq \frac{1}{X^2_{N-1;1-\alpha/2}} \right) = 1-\alpha
+$$$
+giving
+$$$
+\mathbb{P}\left( \frac{(N-1)S^2}{X^2_{N-1;1-\alpha/2}} \leq \sigma^2 \leq \frac{(N-1)S^2}{X^2_{N-1;\alpha/2}} \right) = 1-\alpha
+$$$
+Hence, a stochastic *1 - &alpha;* confidence interval for &sigma;{{2}} for a normal random sample is
+$$$
+\left(\frac{(N-1)S^2}{X^2_{N-1;1-\alpha/2}}, \frac{(N-1)S^2}{X^2_{N-1;\alpha/2}}\right)
+$$$
+We can easily construct hypothesis tests at ~()significance level &alpha;~.
+
+If *H{0} : &sigma;{{2}} = &sigma;{0}{{2}}* and *H{1} : &sigma;{{2}} /= &sigma;{0}{{2}}*, then our ~()test statistic~ is
+$$$
+T = (N-1)\frac{S^2}{\sigma_0^2}
+$$$
+which (under *H{0}*) has a *X{{2}}{N-1}* distribution
+
+Therefore, we reject *H{0}* in favour of *H{1}* if *T* falls in the (two-sided) critical region
+$$$
+(-\infty, X^2_{N-1;\alpha/2}]\cup[X^2_{N-1;1-\alpha/2}, \infty)
+$$$
+Similarly, if *H{0} : &sigma;{{2}} = &sigma;{0}{{2}}* and *H{1} : &sigma;{{2}} > &sigma;{0}{{2}}*, we reject *H{0}* in favour of *H{1}* if *T* falls in the (right one-sided) critical region
+$$$
+[X^2_{N-1;1-\alpha}, \infty)
+$$$
+\ _f
+and if *H{0} : &sigma;{{2}} = &sigma;{0}{{2}}* and *H{1} : &sigma;{{2}} < &sigma;{0}{{2}}*, we reject *H{0}* in favour of *H{1}* if *T* falls in the (left one-sided) critical region
+$$$
+(-\infty, X^2_{N-1;\alpha}]
+$$$
+\ _f
+
+## Sample Mean with Unknown Variance
+We have seen how to construct confidence intervals and hypothesis tests for a normal random sample with ~()known~ variance &sigma;{{2}}. How does this change when &sigma;{{2}} is ~()unknown~, and must instead be replaced by an estimate?
+Recall that *X{1}, X{2}, ..., X{N} ~iid N(&mu;, &sigma;{{2}})*, and consider the hypothesis test *H{0} : &mu; = &mu;{0}* and *H{1} : &mu; /= &mu;{0}*. Our ~()test statistic~ in this case simply replaces the ~()known~ &sigma; with its unbiased estimator *S = &sqrt;S{{2}}*, giving
+$$$
+T = \frac{\bar{X} - \mu_0}{S/\sqrt{N}}
+$$$
+If *H{0}* is true, then it turns out that *T* has a **(Student's) t** distribution, with *N - 1* ~()degrees of freedom~, which we will write as *t{N-1}*. We will not concern ourselves with the particulars of this distribution, other than to note a few salient points:
+- A *t*-distribution random variable is continuous, symmetric around zero, and has non-zero pdf over R (just like the standard normal distribution)
+- As with any other distribution, we may compute &gamma;-quantiles for a *t{N}*-distributed random variable, which we will denote by *t{N;&gamma;}*.
+    - Like the standard normal distribution, we will rely on tables or numerical computation for quantiles and probabilities.
+- As *N -> &infin;*, *t{N}* converges in distribution to N(0, 1). (Moreover, *t{1}* is the ~()Cauchy~ distribution)
+
+Accepting that *T ~ t{N-1}*, we construct a two-sided critical region at significance level &alpha;:
+$$$
+(-\infty,t_{N-1;\alpha/2}]\cup[t_{N-1;1-\alpha/2},\infty)
+$$$
+and we reject *H{0}* if the outcome of our test statistic falls in this region. Similarly, critical regions for one-sided tests are easily constructed:
+- *H{0} : &mu; = &mu;{0}* vs *H{1} : &mu; > &mu;{0}*. Critical region: *[t{N-1;1-&alpha;}, &infin;)*
+- *H{0} : &mu; = &mu;{0}* vs *H{1} : &mu; < &mu;{0}*. Critical region: *(-&infin;, t{N-1;&alpha;}]*
+Moreover, confidence intervals for the mean are straight-forwardly constructed from *T*:
+$$$
+\left(\bar{X} - t_{N-1;1-\alpha/2}\frac{S}{\sqrt{N}}, \bar{X} - t_{N-1;\alpha/2}\frac{S}{\sqrt{N}}\right)
+$$$
+or more compactly, by the symmetry of this distribution around zero:
+$$$
+\bar{X}\pm t_{N-1;1-\alpha/2}\frac{S}{\sqrt{N}}
+$$$
+\ _f
+
+## Summary
+- Sample variance; bias and correction, confidence intervals and hypothesis tests for normal population.
+- Sample mean with unknown variance; Student's *t* distribution (briefly), confidence intervals and hypothesis tests for normal population
