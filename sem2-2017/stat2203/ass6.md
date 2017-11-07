@@ -7,8 +7,6 @@ school: University of Queensland
 subject: ~()**STAT2203**~ -- Probability Models and Data Analysis for Engineering
 ---
 
-# Question 1
-
 # Question 2
 Let
 $$$
