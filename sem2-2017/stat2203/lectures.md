@@ -265,7 +265,7 @@ $$$
 h(p) = \frac{d^2}{dp^2} l(p;X) = -\frac{1}{p^2}\sum^N_{i=1}x_i - \frac{1}{(1-p)^2}\left(Nm - \sum^N_{i=1}x_i\right) < 0
 $$$
 Therefore &hat;p is a local maximiser.
-Moreover, *l(p;X) -> &infty;* as *p -> 0*  or *p -> 1* (boundary of &Theta;). Thus &hat;p is in fact a global maximiser. Therefore, we have the Maximum Likelihood Estimator:
+Moreover, *l(p;X) -> &infin;* as *p -> 0*  or *p -> 1* (boundary of &Theta;). Thus &hat;p is in fact a global maximiser. Therefore, we have the Maximum Likelihood Estimator:
 $$$
 \hat{p} = \frac{1}{Nm}\sum^N_{i=1}X_i
 $$$
@@ -274,3 +274,145 @@ $$$
 - Statistics; definition, example
 - Likelihood and log-likelihood; definition, binomial example
 - Maximum Likelihood Estimation; definition, examples, bias, consistency
+
+# Confidence Intervals and Hypothesis Testing
+## Statistics, Likelihood, and Estimation
+- Statistics; definition, example
+- Likelihood and log-likelihood; definition, binomial example
+- Maximum Likelihood Estimation; definition, examples, bias, consistency
+
+## Confidence Intervals
+Last time, we were introduced to ~()maximum likelihood estimation~, which provided a systematic way of obtaining ~()estimates~ and ~()estimators~ &hat;&theta; of unknown parameters contained in &theta; &isin; &Theta;
+How can we gauge the ~()accuracy~ of &hat;&theta;?
+~()Confidence intervals~ (sometimes called ~()interval estimates~) provide a precise way of describing the uncertainty of &hat;&theta;
+
+Formally, given random variables *X{1}, ..., X{n}* whose joint distribution depends on some unknown &theta; &isin; &Theta;, a **(1 - &alpha;) stochastic confidence interval** is a ~()pair of statistics~
+$$$
+T_1(X_1, \ldots, X_n) \text{and} T_2(X_1, \ldots, X_n)
+$$$
+with the property that
+$$$
+\mathbb{P}(T_1 < \theta < T_2) \geq 1 - \alpha, \text{ for all } \theta\in\Theta
+$$$
+for some &alpha; &isin; [0, 1]
+That is, (T{1}, T{2}) is a ~()random~ interval, based only on the (as yet to be observed) outcomes *X{1}, ..., X{n}*, that contains the unknown &theta; with probability at least *1 - &alpha;*.
+
+A realisation of the random interval, say *(t{1}, t{2})*, is called a **(1 - &alpha;) numeric confidence interval** for &theta;.
+
+**Remark:** Whilst ~()stochastic~ confidence intervals contain the unknown &theta; with probability at least *1 - &alpha;*, their numerical counterparts either contain &theta; or they do not. It may be helpful to think of a Bernoulli analogy, where "success" occurs with probability (at least) *1 - &alpha;* -- then outcomes are either "successes" or "failures"
+
+### Confidence Interval Example
+**Example:** Model: *X{1}, X{2}, ..., X{n} ~iid N(&mu;, &sigma;{{2}})*; &sigma;^2 known, &mu; unknown, in &Theta; = R.
+We have seen that
+$$$
+\bar{X} = \frac{1}{N}\sum^N_{i=1}X_i\qquad \tilde N(\mu, \frac{\sigma^2}{N})
+$$$
+Therefore,
+$$$
+\frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{N}}} \tilde N(0, 1)
+$$$
+Hence,
+$$$
+\mathbb{P}\left(z_{\alpha/2}\leq\frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{N}}} \leq z_{1-\alpha/2}\right) = 1-\alpha
+$$$
+where *z{&gamma;}* is the &gamma;-quantile of the standard normal distribution.
+
+Rearranging, we have
+$$$
+\mathbb{P}\left(\bar{X} - z_{1-\alpha/2}\frac{\sigma}{\sqrt{N}}\leq\mu\leq\bar{X} - z_{\alpha/2}\frac{\sigma}{\sqrt{N}}\right) = 1 - \alpha
+$$$
+Note that, by symmetry, the quantiles satisfy *-z{&alpha;/2} = z{1-&alpha;/2}*. Hence a stochastic *1 - &alpha;* confidence interval for &mu; in this case is
+$$$
+\left(\bar{X} - z_{1-\alpha/2}\frac{\sigma}{\sqrt{N}}, \bar{X} + z_{1-\alpha/2}\frac{\sigma}{\sqrt{N}}\right)
+$$$
+which is often abbreviated to
+$$$
+\bar{X} \pm z_{1-\alpha/2}\frac{\sigma}{\sqrt{N}}
+$$$
+
+### Approximate Confidence Intervals
+When
+$$$
+\mathbb{P}(T_1 < \theta < T_2) \geq 1 - \alpha,\ \text{or all}\ \theta\in\Theta
+$$$
+only holds ~()approximately~, we call (T{1}, T{2}) an **approximate (1 - &alpha;) confidence interval** for &theta;.
+
+**Remark:** We can often employ the central limit theorem to construct such approximate confidence intervals, as we shall see next.
+
+### Approximate Confidence Interval Example
+**Example:** Model *X{1}, X{2}, ..., X{N} ~iid Bin(m, p)*; *m* known, *p* unknown, in &Theta; = (0, 1), with MLE for *p*:
+$$$
+\hat{p} = \frac{1}{Nm}\sum^N_{i=1}X_i
+$$$
+Notice that *Y = &sum;{{N}}{i=1} X{i}* can be thought of as *Y ~ Bin(Nm, p)*, and so by the central limit theorem,
+$$$
+Y ~_{approx} \textbf{N}(Nmp, Nmp(1-p))
+$$$
+or equivalently
+$$$
+\hat{p} ~_{approx} \textbf{N}\left(p, \frac{p(1-p)}{Nm}\right)
+$$$
+Therefore, we have
+$$$
+\mathbb{P}\left(z_{\alpha/2}\leq\frac{\hat{p}-p}{\frac{\sqrt{p(1-p)}}{\sqrt{Nm}}}\leq z_{1-\alpha/2}\right)\approx 1-\alpha
+$$$
+By the law of large numbers, &hat;p&approx;p, so we may replace *p* in the denominator to obtain
+$$$
+\mathbb{P}\left(z_{\alpha/2}\leq\frac{\hat{p} - p}{\sqrt{\hat{p}(1-\hat{p})}/\sqrt{Nm}}\leq z_{1-\alpha/2}\right)\approx 1-\alpha
+$$$
+Rearranging, and using the symmetry of standard normal quantiles, we have
+$$$
+\mathbb{P}\left( \hat{p} - z_{1-\alpha/2}\frac{\sqrt{\hat{p}(1-\hat{p})}}{\sqrt{Nm}} \leq p \leq \hat{p} + z_{1 - \alpha/2}\frac{\sqrt{\hat{p}(1-\hat{p})}}{\sqrt{Nm}} \right) \approx 1 - \alpha
+$$$
+which is an approximate *1 - &alpha;* confidence interval for *p*:
+$$$
+\hat{p}\pm z_{1-\alpha/2}\sqrt{\frac{\hat{p}(1-\hat{p})}{Nm}}
+$$$
+
+## Hypothesis Testing
+\ _f
+Closely related to the notion of confidence intervals is that of ~()hypothesis tests~. In ~()hypothesis testing~, given data, we wish to determine which of two competing hypotheses *H{0} : &theta; &isin; &Theta;{0}* and *H{1} : &theta; &isin; &Theta;{1}* holds true. *H{0}* is called the **null hypothesis** and contains the "status quo" statement, whereas *H{1}* is called the **alternative hypothesis** which is unlikely to have occurred if *H{0}* were true.
+**Remark:** Usually, *&Theta;{0} &cap; &Theta{1} = (/)*
+
+Outcomes of hypothesis tests are ~()decisions~ as to whether to accept the "status quo" *H{0}*, or reject the "status quo" in favour of the alternative *H{1}*. As such, we seek a ~()decision rule~ based on the outcome of a statistic *T*.
+- ~()Decision Rule 1:~ Reject *H{0}* if *T* falls in some ~()critical region~ *C*
+- ~()Decision Rule 2:~ Reject *H{0}* if *P(T &isin; C)* is less than some ~()critical p-value~ *p{c}*.
+**Remark:** Common critical regions are one-sided (C = (-&infin;, c], C = [c, &infin;)), or two-sided (C = (-&infin;, c{1}] &cup; [c{2}, &infin;), c{1} <= c{2})
+
+Regardless of which type of decision rule is employed, we can make two types of error.
+
+| Decision | H{0} True | H{1} True
+| --- | --- | --- | --- |
+| Retain H{0} | Correct | Type II Error
+| Reject H{0} | Type I Error | Correct
+
+**Remark:** We can think of Type I error as a "false positive" and Type II error as a "false negative".
+In classical statistics, Type I error is considered more serious, and so decision rules are designed to control this type of error.
+
+We will denote the probability of a Type I error by &alpha;, and the probability of a Type II error by &beta;.
+**Remark:** The **power** of a statistical test is the probability of correctly rejecting the null, 1 - &beta;
+We will design our decision rules around a predetermined **significance level** &alpha;, which describes the acceptable level of Type I error for our test. In this framework, the two types of decision rule are ~()equivalent~:
+- Decision Rule 2: Reject *H{0}* if *P(T &isin; C{&alpha;}) <= &alpha;*
+- Decision Rule 1: Reject *H{0}* if *T* falls in *C{&alpha;}*
+
+### Hypothesis Testing Example
+**Example:** Model *X{1}, X{2}, ..., X{N} ~iid N(&mu;, &sigma;{{2}})*; &sigma;{{2}} known, &mu; unknown, in &Theta; = R. We can readily adapt our previous work to form a hypothesis test together with a decision rule about the unknown &mu;.
+Let *H{0}: &mu; = &mu;{0}* and *H{1}: &mu; /= &mu{0};*
+Under the null hypothesis *H{0}*,
+$$$
+T = \frac{\bar{X} - \mu_0}{\sigma/\sqrt{N}} ~ N(0, 1)
+$$$
+and so
+$$$
+C_\infty = (-\infty, z_{\alpha/2}]\cup[z_{1-\alpha/2}, \infty)
+$$$
+is a critical region satisfying
+$$$
+\mathbb{P}_{H_0}(T\in C_\alpha) \leq \alpha
+$$$
+\ _f
+Therefore, we reject *H{0}* if our observed statistic *t* falls in *C{&alpha;}*
+
+## Summary
+- Confidence intervals; definition, stochastic, numerical, approximate, examples
+- Hypothesis testing; decision rules, null and alternative hypotheses, Type I and II error, significance level, power, critical region, critical *p*-value, one- and two-sided regions (hence tests).
