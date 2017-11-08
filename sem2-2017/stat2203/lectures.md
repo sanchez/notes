@@ -305,11 +305,11 @@ A realisation of the random interval, say *(t{1}, t{2})*, is called a **(1 - &al
 **Example:** Model: *X{1}, X{2}, ..., X{n} ~iid N(&mu;, &sigma;{{2}})*; &sigma;^2 known, &mu; unknown, in &Theta; = R.
 We have seen that
 $$$
-\bar{X} = \frac{1}{N}\sum^N_{i=1}X_i\qquad \tilde N(\mu, \frac{\sigma^2}{N})
+\bar{X} = \frac{1}{N}\sum^N_{i=1}X_i\qquad \sim N(\mu, \frac{\sigma^2}{N})
 $$$
 Therefore,
 $$$
-\frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{N}}} \tilde N(0, 1)
+\frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{N}}} \sim N(0, 1)
 $$$
 Hence,
 $$$
@@ -449,7 +449,7 @@ S^2 &= \frac{N}{N-1}\hat{\sigma^2}\\
 $$$
 For a normal random sample, it turns out that
 $$$
-(N-1)\frac{S^2}{\sigma^2} \tilde X^2_{N-1} \equiv \text{Gamma}(\frac{N-1}{2}, \frac{1}{2})
+(N-1)\frac{S^2}{\sigma^2} \sim X^2_{N-1} \equiv \text{Gamma}(\frac{N-1}{2}, \frac{1}{2})
 $$$
 \ _f
 **Remark:** The fact that the ~()degrees of freedom~ is *N - 1* comes from the fact that there are only *N - 1* linearly independent elements of
@@ -549,7 +549,7 @@ Construct a *1 - &alpha;* stochastic confidence interval for the ~()difference~ 
 Firstly, notice that *&bar;X ~ N(&mu;{X}, &sigma;{{2}}{X}/M)* independent of *&bar;Y ~ N(&mu;{Y}, &sigma;{{2}}{Y}/N)*.
 Therefore, *&bar;X - &bar;Y ~ N(&mu;{X} - &mu;{Y}, &sigma;{X}{{2}}/M + &sigma;{Y}{{2}}/N)*, and so
 $$$
-Z = \frac{(\bar{X} - \bar{Y}) - (\mu_X - \mu_Y)}{\sqrt{\frac{\sigma^2_X}{M}+\frac{\sigma^2_Y}{N}}} \tilde N(0, 1)
+Z = \frac{(\bar{X} - \bar{Y}) - (\mu_X - \mu_Y)}{\sqrt{\frac{\sigma^2_X}{M}+\frac{\sigma^2_Y}{N}}} \sim N(0, 1)
 $$$
 Hence, by definition,
 $$$
@@ -570,7 +570,7 @@ $$$
 This work can be extended to create hypothesis tests in the usual way, as follows. For the two-sided test, with a pair of normal random samples with known variances *&sigma;{X}{{2}}* and *&sigma;{Y}{{2}}*, we have *H{0} : (&mu;{X} - &mu;{Y}) = &delta;{0}* and *H{1} : (&mu;{X} - &mu;{Y}) /= &delta;{0}*.
 Under *H{0}*
 $$$
-T = \frac{(\bar{X} - \bar{Y}) - \delta_0}{\sqrt{\frac{\sigma^2_X}{M}+\frac{\sigma^2_Y}{N}}} \tilde N(0, 1)
+T = \frac{(\bar{X} - \bar{Y}) - \delta_0}{\sqrt{\frac{\sigma^2_X}{M}+\frac{\sigma^2_Y}{N}}} \sim N(0, 1)
 $$$
 and so the critical region for a test with significance level &alpha; is
 $$$
@@ -600,7 +600,7 @@ S^2_p = \frac{1}{M+N-2} \left(  \sum^M_{i=1}(X_i - \bar{X})^2+\sum^N_{j=1}(Y_j -
 $$$
 Therefore, we can use our previous work, and note that
 $$$
-T = \frac{(\bar{X} - \bar{Y}) - (\mu_X - \mu_Y)}{S_p \sqrt{\frac{1}{M}+\frac{1}{N}}} \tilde t_{M+N-2}
+T = \frac{(\bar{X} - \bar{Y}) - (\mu_X - \mu_Y)}{S_p \sqrt{\frac{1}{M}+\frac{1}{N}}} \sim t_{M+N-2}
 $$$
 \ _f
 Hence, a *1 - &alpha;* stochastic confidence interval for *(&mu;{X} - &mu;{Y})* with ~()unknown common variance~ is
@@ -609,7 +609,7 @@ $$$
 $$$
 For the two-sided test, with a pair of normal random samples with unknown common variance &sigma;{{2}}, we have *H{0} : (&mu;{X} - &mu;{Y}) = &delta;{0}* and *H{1} : (&mu;{X} - &mu;{Y}) /= &delta;{0}*. Under *H{0}*,
 $$$
-T = \frac{(\bar{X} - \bar{Y}) - \delta_0}{S_p\sqrt{\frac{1}{M}+\frac{1}{N}}} \tilde t_{M+N-2}
+T = \frac{(\bar{X} - \bar{Y}) - \delta_0}{S_p\sqrt{\frac{1}{M}+\frac{1}{N}}} \sim t_{M+N-2}
 $$$
 \ _f
 and so the critical region for a test with significance level &alpha; is
@@ -635,12 +635,12 @@ $$$
 How can we construct confidence intervals and hypothesis tests for the unknown variances of two random samples?
 Last time, we stated that for a normal random sample, *X{1}, ..., X{M} ~iid N(&mu;{X}, &sigma;{X}{{2}})*,
 $$$
-(M-1)\frac{S_X^2}{\sigma^2_X}\tilde X^2_{M-1}\equiv\text{Gamma}(\frac{M-1}{2},\frac{1}{2})
+(M-1)\frac{S_X^2}{\sigma^2_X}\sim X^2_{M-1}\equiv\text{Gamma}(\frac{M-1}{2},\frac{1}{2})
 $$$
 \ _f
 This time, we will state that if we have two independent normal random samples *X{1}, ..., X{M} ~iid N(&mu;{X}, &sigma;{X}{{2}})* and *Y{1}, ..., Y{N} ~iid N(&mu;{Y}, &sigma;{Y}{{2}})*,
 $$$
-\frac{S^2_X/\sigma^2_X}{S^2_Y/\sigma^2_Y} \tilde F_{M-1,N-1}
+\frac{S^2_X/\sigma^2_X}{S^2_Y/\sigma^2_Y} \sim F_{M-1,N-1}
 $$$
 \ _f
 where *F{m,n}* is the *F*-distribution with *m* and *n* ~()degrees of freedom~
@@ -658,7 +658,7 @@ $$$
 We may use this to construct hypothesis tests: *H{0} : &sigma;{X}{{2}} = &sigma;{Y}{{2}}* vs *H{1} : &sigma;{X}{{2}} /= &sigma;{Y}{{2}}*.
 Under *H{0}*,
 $$$
-\frac{S^2_X}{S^2_Y} \tilde F_{M-1,N-1}
+\frac{S^2_X}{S^2_Y} \sim F_{M-1,N-1}
 $$$
 \ _f
 and so an appropriate critical region at the &alpha; significance level is
@@ -671,3 +671,99 @@ One-sided tests can be constructed as seen before.
 ## Summary
 - Two-sample difference of means; confidence intervals and hypothesis tests for normal population, known and unknown (common and not) variance.
 - Two-sample ratio of variances; *F* distribution (briefly), confidence intervals and hypothesis tests for normal population.
+
+# Confidence Intervals and Hypothesis Testing IV
+- Two-sample difference of means; confidence intervals and hypothesis tests for normal population, known and unknown (common and not) variance
+
+## Two Sample Inference for Variances
+How can we construct confidence intervals and hypothesis tests for the unknown variances of two random samples?
+Last time, we stated that for a normal random sample, *X{1}, ..., X{M} ~iid N(&mu;{X}, &sigma;{X}{{2}})*,
+$$$
+(M-1)\frac{S^2_X}{\sigma^2_X} \sim X^2_{M-1} \equiv \text{Gamma}(\frac{M-1}{2}, \frac{1}{2})
+$$$
+\ _f
+This time, we will state that if we have two independent normal random samples *X{1}, ..., X{M} ~iid N(&mu;{X}, &sigma;{X}{{2}})* and *Y{1}, ..., Y{N} ~iid N(&mu;{Y}, &sigma;{Y}{{2}})*,
+$$$
+\frac{S^2_X/\sigma^2_X}{S^2_Y/\sigma^2_Y} \sim F_{M-1,N-1}
+$$$
+\ _f
+where *F{m,n}* is the *F*-distribution with *m* and *n* ~()degrees of freedom~
+
+**Remark:** As with the *t*-distribution, we will not go into details regarding the *F*-distribution, but simply accept this and rely on numerical computation or tabulation of its quantiles.
+Using this fact, we may write by definition
+$$$
+\mathbb{P}\left( F_{N-1,M-1;\alpha/2} \leq \frac{S^2_Y/\sigma^2_Y}{S^2_X/\sigma^2_X} \leq F_{N-1,M-1;1-\alpha/2} \right) = 1-\alpha
+$$$
+\ _f
+Rearranging, we have a stochastic *1 - &alpha;* confidence interval for the ratio of the unknown population variances:
+$$$
+\mathbb{P}\left( F_{N-1,M-1;\alpha/2}\frac{S^2_X}{S^2_Y} \leq \frac{\sigma^2_X}{\sigma^2_Y} \leq F_{N-1,M-1;1-\alpha/2}\frac{S^2_X}{S^2_Y} \right) = 1 - \alpha
+$$$
+We may use this to construct hypothesis tests: *H{0} : &sigma;{X}{{2}} = &sigma{Y}{{2}}* vs *H{1} : &sigma;{X}{{2}} /= &sigma;{Y}{{2}}*
+Under *H{0}*
+$$$
+\frac{S^2_X}{S^2_Y} \sim F_{M-1,N-1}
+$$$
+\ _f
+and so an appropriate critical region at the &alpha; significance level is
+$$$
+C_\alpha = (\infty, F_{M-1,N-1;\alpha/2}] \cup [F_{M-1,N-1;1-\alpha/2}, \infty)
+$$$
+\ _f
+One-sided tests can be constructed as seen before
+
+## Goodness of Fit
+~()Goodness of Fit~ refers to assessing the quality of a model in light of data. We have seen ~()graphical~ goodness of fit procedures -- namely quantile-quantile plots. We can also approach goodness of fit from a ~()statistical~ viewpoint, by devising ~()statistical tests~ based on the data directly (through the empirical cdf), or through first ~()binning~ the data, and comparing ~()expected~ bin values (based on our probabilistic model) to ~()observed~ bin values from data.
+
+### Kolmogorov-Smirnov Test
+Suppose that *X{1}, ..., X{N}* is an random sample (that is, an iid sample) from some distribution with cdf *F*. If indeed *X{1}, ..., X{N} ~iid F*, then, when ordered *X{(1)} < ... < X{(N)}*,
+$$$
+\mathbb{P}(\frac{k-1}{N} < F(X_{(k)}) \leq \frac{k}{N}) = \frac{1}{N},\qquad k=1,\ldots,N
+$$$
+\ _f
+In other words, if *X{1}, ..., X{N}* were a random sample from *F*, then *F(X{1}), ..., F(X{N})* would be random sample from *U[0, 1]*
+This observation is basis of the ~()Kolmogorov-Smirnov test~, which utilizes the distribution of maximum deviation of a uniform random sample from the straight line (0, 0) - (1, 1)
+The ~()(scaled) Kolmogorov-Smirnov~ statistic is
+![Kolmogorov-Smirnov Statistic](sem2-2017/stat2203/kolmogorov.png)[75]
+which, under the null hypothesis that the data is a random sample from *F* has a ~()Kolmogorov-Smirnov~ distribution. Once more, we will not go into the details of this distribution, other than to note that its quantiles may be tabulated or computed numerically. In particular, for a particular outcome *k{N}* of *K{N}*, we can computer the *p*-value under the null hypothesis *p = P(K{N} > k{N})*, and reject the null if *p <= &alpha;*, for some pre-specified significance level &alpha;.
+
+**Remark:** The ~()Kolmogorov-Smirnov~ test is ~()non-parametric~, in the sense that it does not test parameters of a particular distribution, but rather is applicable to any distribution form. Moreover, it can be used when the hypothesised *F* itself is an empirical cdf, and we wish to test whether certain observed data could have come from the same distribution as other known data.
+
+### X2 Goodness of Fit Tests
+Suppose that we have an underlying model that *X{1}, ..., X{N}* is a random sample from a distribution with cdf *F*. Then, we may consider ~()binning~ the random sample into *M* mutually exclusive and exhaustive intervals, say *I{1} = (-&infin;, a{1}], I{2} = (a{1}, a{2}], ..., I{M-1} = (a{M-2}, a{M-1}], I{M} = (a{M-1}, &infin;)*. If our model were true, then the ~()counts~ of the number in each bin would follow a ~()multinomial~ distribution: *(Y{1}, ..., Y{M}) ~ Mnom(N, &pi;)*, where
+$$$
+\pi_k = \mathbb{P}(X_1\in I_k)
+$$$
+
+The ~()X{{2}} test statistic~ measures the discrepancy between ~()observed~ counts in each bin, and the ~()expected~ counts, if our model were true:
+$$$
+T = \sum^K_{i=1}\frac{(X_i-N\pi_i)^2}{N\pi_i}
+$$$
+It turns out that, if our model were true,
+$$$
+T\sim X^2_{K-1}
+$$$
+and so we can use this to test whether it is reasonable that observed data comes from our hypothesised distribution *F*.
+**Remark:** A rule of thumb for the validity of this approximation is *N&pi; >= 5*, for *i = 1, ..., K*.
+In particular, if our observed test statistic *t* falls in the critical region
+$$$
+[X^2_{K-1;\alpha}, \infty)
+$$$
+\ _f
+then we would ~()reject~ the hypothesis that our data is a random sample from *F*, at the &alpha; significance level.
+**Remark:** Once again, notice that this form of testing is ~()non-parametric~, as it does not test the parameters of a particular distribution, or rely on a particular parametric distribution form for *F*.
+
+### X2 GoF Example
+**Example:** Suppose we ~()expect~ the number of hits to our website to be equally divided between Spring, Summer, Autumn, and Winter. Therefore, with *N* hits, and letting (Y{1}, Y{2}, Y{3}, Y{4}) be the number of hits per quarter, our model is* **Y** ~ Mnom(N, (1/4, 1/4, 1/4, 1/4))*. If we had 100,000 hits last year, our ~()expected~ number of hits per quarter under our model is 25,000. Suppose we ~()observe~ 25,790, 25,618, 25,671, and 22,921 hits, and we wish to test our model at the &alpha; = 0.01 level. Then our test statistic is:
+$$$
+t = \frac{(25790 - 25000)^2}{25000}+\frac{(25618-25000)^2}{25000}+\frac{(25671-25000)^2}{25000}+\frac{(22921-25000)^2}{25000}\approx 231.1402
+$$$
+Under the null hypothesis, *T ~{appprox} X{3}{{2}}*, and so the *p*-value for this outcome is
+$$$
+\mathbb{P}(T > t) \approx 0
+$$$
+This is less than 0.01, so we reject *H{0}* and conclude that the data is ~()not~ consistent with the model at the &alpha; = 0.01 significance level
+
+## Summary
+- Two-sample ratio of variances; *F* distribution (briefly), confidence intervals and hypothesis tests for normal population.
+- Goodness of fit; Kolmogorov-Smirnov (basis, statistic, test, illustration), X{{2}} (basis, statistic, test, example)
