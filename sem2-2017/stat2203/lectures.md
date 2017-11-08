@@ -749,7 +749,6 @@ In particular, if our observed test statistic *t* falls in the critical region
 $$$
 [X^2_{K-1;\alpha}, \infty)
 $$$
-\ _f
 then we would ~()reject~ the hypothesis that our data is a random sample from *F*, at the &alpha; significance level.
 **Remark:** Once again, notice that this form of testing is ~()non-parametric~, as it does not test the parameters of a particular distribution, or rely on a particular parametric distribution form for *F*.
 
@@ -767,3 +766,138 @@ This is less than 0.01, so we reject *H{0}* and conclude that the data is ~()not
 ## Summary
 - Two-sample ratio of variances; *F* distribution (briefly), confidence intervals and hypothesis tests for normal population.
 - Goodness of fit; Kolmogorov-Smirnov (basis, statistic, test, illustration), X{{2}} (basis, statistic, test, example)
+
+# Regression
+## Regression
+**Regression models** are used to describe functional relationships between ~()explanatory~ variables **X** and ~()response~ variables **Y**. In such models, the response variables **Y** are assumed to be a function **f** of the explanatory variables **X**, corrupted by noise from a (zero-mean) ~()error model~. Usually, the function **f** is ~()parametric~, depending on some parameter vector **&beta;**, so that we may write the regression model as
+$$$
+Y = f(X;\beta) + \epsilon
+$$$
+where &epsilon; is a zero-mean random variable encoding our error model.
+**Remark:** Usually, we assume that *&epsilon; ~ N(0, &sigma;{{2}}I)*, independent of all other random variables.
+In this framework, given outcomes of the explanatory variables **X = x**, the response variables **Y** have conditional expectation
+$$$
+\mathbb{E}[Y\mid X=x] = f(x;\beta)
+$$$
+In a **linear regression** model, this relationship is linear, so that
+$$$
+\mathbb{E}[Y\mid X=x] = \beta_0 + \beta_1 x
+$$$
+In other words, in a linear regression model, given the outcome of the *i*-th explanatory variable *X{i} = x{i}*, the *i*-th response variable *Y{i}* modelled as
+$$$
+Y_i = \beta_0+\beta_1x_i+\epsilon_i,\qquad i=1,\ldots,N
+$$$
+where the usual error model is *&epsilon;{1}, ..., &epsilon;{N} ~iid N(0, &sigma;{{2}})*
+
+### Linear Regression
+The line
+$$$
+y = \beta_0+\beta_1x
+$$$
+is called the **regression line** (or more generally, ~()regression curve~). Notice that the linear regression model depends on the unknown coefficients &beta;{0} and &Beta;{1}, as well as the (typically unknown) error variance &sigma;{{2}}. Given outcomes of the explanatory variables **X = x** and response variables **Y = y**, how can we determine the unknown coefficients in &beta; = (&beta;{0}, &beta;{1}){{T}}?
+
+## Least Squares Method
+To do so, we first need a reasonable way of determining how well a given parameter setting &beta; fits the data. The usual approach is to examine the **residuals** given a particular parameter setting:
+$$$
+r_i = y_i - (\beta_0+\beta_1x_i)
+$$$
+which is just the ~()residual~ value of observed response *y{i}* once the model involving the explanatory variables has been removed. A typical measure of overall model fit is then the sum of the squared residuals:
+$$$
+\sum^N_{i=1} r^2_i = \sum^N_{i=1}(y_i - (\beta_0+\beta_1x_i))^2
+$$$
+The usual approach for finding the best parameters is to ~()minimise~ the sum of the squared residuals. This approach is called the **method of least squares**.
+Formally, we seek to minimise
+$$$
+\sum^N_{i=1}r^2_i = \mid\mid r\mid\mid^2
+$$$
+with respect to the parameter vector &beta;. Whenever we may write a **linear model**
+$$$
+Y = A\beta+\epsilon,\qquad\epsilon\sim N(0, \sigma^2I)
+$$$
+for some parameter vector &beta; and **design matrix** *A* (whose elements may depend on the outcomes of explanatory variables **X = x**), for given outcomes **Y = y** we have
+$$$
+\mid\mid r\mid\mid^2 = \mid\mid y-A\beta\mid\mid^2
+$$$
+
+Therefore, for a linear model, we seek a parameter vector &beta; that solves
+$$$
+\nabla_\beta \mid\mid y-A\beta\mid\mid^2 = 0
+$$$
+or in other words
+$$$
+A^T(y-A\beta)=0
+$$$
+\ _f
+This set of ~()linear~ equations in &beta; are called the **normal equations.** Rearranging, we have
+$$$
+A^TA\beta=A^Ty
+$$$
+so that if (A{{T}}A) is ~()invertible~,
+$$$
+\beta = (A^TA)^{-1}A^Ty
+$$$
+**Remark:** The design matrix *A* can always be chosen so that (A{{T}}A) is invertible. However, in practice, we never explicitly compute its inverse, but rather solve the set of linear equations numerically (for example via Gaussian elimination).
+
+### Least Squares Example
+**Example:** Suppose we have the ~()linear regression~ model.
+$$$
+Y_i = \beta_0+\beta_1x_i+\epsilon_i,\qquad i=1,\ldots,N
+$$$
+where *&epsilon;{1}, ..., &epsilon;{N} ~iid N(0, &sigma;{{2}})*. Given an outcome **Y = y**, what is the ~()least squares solution~ for *&beta; = (&beta;{0}, &beta;{1}){{T}}*?
+It is convenient to rewrite this model as
+$$$
+Y=A\beta+\epsilon
+$$$
+where the ~()design matrix~ A is given by
+$$$
+\begin{pmatrix}
+1&x_1\\
+.&.\\
+.&.\\
+.&.\\
+1&x_N
+\end{pmatrix}
+$$$
+Then, given **Y = y**, the least squares solution *&hat;&beta;* solves
+$$$
+(A^TA)\hat{\beta}=A^Ty
+$$$
+**Remark:** In this case, we can solve for *&hat;&beta;* exactly, yielding
+$$$
+\hat{\beta_1} = \frac{\sum^N_{i=1}(x_i-\bar{x})(y_i-\bar{y})}{\sum^N_{i=1}(x_i-\bar{x})^2}
+$$$
+and
+$$$
+\hat{\beta_0} = \bar{y} - \beta_1\bar{x}
+$$$
+where as usual *&bar;x* and *&bar;y* denote the average of outcomes *\{x{i}\}* and *\{y{i}\}* respectively.
+
+**Example:** Suppose we have a ~()quadratic regression~ model
+$$$
+Y_i = \beta_0+\beta_1x_i+\beta_2x^2_i+\epsilon_i,\qquad i=1,\ldots,N
+$$$
+where *&epsilon{1}, ..., &epsilon{N} ~iid N(0, &sigma;{{2}})*. Given an outcome **Y = y**, what is the ~()least squares solution~ for *&beta; = (&beta;{0}, &beta;{1}, &beta;{2}){{T}}*? Once again, it is convenient to rewrite this model as
+$$$
+Y=A\beta+\epsilon
+$$$
+where the ~()design matrix~ A is given by
+$$$
+A = 
+\begin{pmatrix}
+1&x_1&x^2_1\\
+.&.&.\\
+.&.&.\\
+.&.&.\\
+1&x_N&x^2_N
+\end{pmatrix}
+$$$
+Then, given **Y = y**, the least squares solution *&hat;&beta;* solves the ~()normal equations~
+$$$
+(A^TA)\hat{\beta} = A^Ty
+$$$
+**Remark 1:** As these illustrate, ~()linear models~ depend linearly on the unknown parameters &beta;, and do ~()not~ require that the form of the regression curve be linear. In contrast, whenever the regression model is not linear in &beta;, then it is said to be a ~()nonlinear regression model~.
+**Remark 2:** For linear models, it turns out that the least squares solution &hat;&beta; is the maximum likelihood solution.
+
+## Summary
+- Regression; model, error term, linear regression, quadratic regression, linear models, residuals
+- Least squares; basis, normal equations, examples
