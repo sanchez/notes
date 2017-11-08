@@ -535,3 +535,139 @@ $$$
 ## Summary
 - Sample variance; bias and correction, confidence intervals and hypothesis tests for normal population.
 - Sample mean with unknown variance; Student's *t* distribution (briefly), confidence intervals and hypothesis tests for normal population
+
+# Confidence Intervals and Hypothesis Testing III
+- Sample variance; bias and correction, confidence intervals and hypothesis tests for normal population
+- Sample mean with uknown variance; Student's *t* distribution (briefly), confidence intervals and hypothesis tests for normal population
+
+## Two Sample Inference
+Previously, we have seen how to construct confidence intervals and hypothesis tests for unknown parameters for a ~()single~ random sample. However, in many cases we are interested in inference regarding the unknown parameters of ~()two~ random samples. How does the construction of confidence intervals and hypothesis tests extend to this situation?
+
+### Two Sample Inference Example
+**Example:** Model *X{1}, ..., X{M} ~iid N(&mu;{X}, &sigma;{{2}}{X})* independent of *Y{1}, ..., Y{N} ~iid N(&mu;{Y}, &sigma;{{2}}{Y})*, with ~()known~ variances &sigma;{{2}}{X} and &sigma;{{2}}{Y}, but unknown means &mu;{X} and &mu;{Y}.
+Construct a *1 - &alpha;* stochastic confidence interval for the ~()difference~ in means, *&mu;{X} - &mu;{Y}*
+Firstly, notice that *&bar;X ~ N(&mu;{X}, &sigma;{{2}}{X}/M)* independent of *&bar;Y ~ N(&mu;{Y}, &sigma;{{2}}{Y}/N)*.
+Therefore, *&bar;X - &bar;Y ~ N(&mu;{X} - &mu;{Y}, &sigma;{X}{{2}}/M + &sigma;{Y}{{2}}/N)*, and so
+$$$
+Z = \frac{(\bar{X} - \bar{Y}) - (\mu_X - \mu_Y)}{\sqrt{\frac{\sigma^2_X}{M}+\frac{\sigma^2_Y}{N}}} \tilde N(0, 1)
+$$$
+Hence, by definition,
+$$$
+\mathbb{P}(z_{\alpha/2} \leq Z \leq z_{1-\alpha/2}) = 1-\alpha
+$$$
+Rearranging as usual, we obtain an output which can be put more compactly (and using the symmetry of normal quantiles)
+$$$
+(\bar{X} - \bar{Y}) \pm z_{1-\alpha/2}\sqrt{\sigma_X^2/M+\sigma^2_Y/N}
+$$$
+as a *1 - &alpha;* stochastic confidence interval for the difference in means.
+
+**Remark:** If each random sample has a common known variance *&sigma;{X}{{2}} = &sigma;{Y}{{2}} = &sigma;{{2}}*, then this confidence interval reduces to
+$$$
+(\bar{X} - \bar{Y}) \pm z_{1-\alpha/2}\sigma\sqrt{\frac{1}{M}+\frac{1}{N}}
+$$$
+\ _f
+
+This work can be extended to create hypothesis tests in the usual way, as follows. For the two-sided test, with a pair of normal random samples with known variances *&sigma;{X}{{2}}* and *&sigma;{Y}{{2}}*, we have *H{0} : (&mu;{X} - &mu;{Y}) = &delta;{0}* and *H{1} : (&mu;{X} - &mu;{Y}) /= &delta;{0}*.
+Under *H{0}*
+$$$
+T = \frac{(\bar{X} - \bar{Y}) - \delta_0}{\sqrt{\frac{\sigma^2_X}{M}+\frac{\sigma^2_Y}{N}}} \tilde N(0, 1)
+$$$
+and so the critical region for a test with significance level &alpha; is
+$$$
+C_\alpha = (-\infty, z_{\alpha/2}] \cup [z_{1-\alpha/2}, \infty)
+$$$
+\ _f
+One-sided tests, and tests with common variance &sigma;{{2}} can be constructed in the same way.
+
+## Two Sample Inference with Unknown Variance
+How does this change when the variances of the samples are ~()unknown~?
+There are two possibilities:
+- The unknown variances are ~()not assumed~ to be the same
+- The unknown variances are ~()assumed~ to be the same
+In the first case, we may ~()estimate~ &sigma;{X}{{2}} by S{X}{{2}}, and &sigma;{Y}{{2}} by S{Y}{{2}}.
+Then we may construct the ~()same~ intervals and tests as before, replacing each variance by its estimator. This will yield ~()approximate~ confidence intervals, and ~()approximate~ hypothesis tests, which become more exact as both of the sample sizes become large.
+In the second case, we need to estimate the common variance. The ~()(uncorrected) pooled sample variance~ would just be
+$$$
+\hat{\sigma^2_p} = \frac{1}{M+N}\left( \sum^M_{i=1}(X_i - \bar{X})^2+\sum^N_{j=1}(Y_j-\bar{Y})^2 \right)
+$$$
+However, as we have seen before, this is a ~()biased~ estimator. Here, we can easily compute
+$$$
+\mathbb{E}[\hat{\sigma^2_p}] = \frac{M-1+N-1}{M+N}\sigma^2
+$$$
+so the ~()(bias corrected) pooled sample variance~ is just
+$$$
+S^2_p = \frac{1}{M+N-2} \left(  \sum^M_{i=1}(X_i - \bar{X})^2+\sum^N_{j=1}(Y_j - \bar{Y})^2  \right)
+$$$
+Therefore, we can use our previous work, and note that
+$$$
+T = \frac{(\bar{X} - \bar{Y}) - (\mu_X - \mu_Y)}{S_p \sqrt{\frac{1}{M}+\frac{1}{N}}} \tilde t_{M+N-2}
+$$$
+\ _f
+Hence, a *1 - &alpha;* stochastic confidence interval for *(&mu;{X} - &mu;{Y})* with ~()unknown common variance~ is
+$$$
+(\bar{X} - \bar{Y}) \pm t_{M+N-2;1-\alpha/2} S_p \sqrt{\frac{1}{M}+\frac{1}{N}}
+$$$
+For the two-sided test, with a pair of normal random samples with unknown common variance &sigma;{{2}}, we have *H{0} : (&mu;{X} - &mu;{Y}) = &delta;{0}* and *H{1} : (&mu;{X} - &mu;{Y}) /= &delta;{0}*. Under *H{0}*,
+$$$
+T = \frac{(\bar{X} - \bar{Y}) - \delta_0}{S_p\sqrt{\frac{1}{M}+\frac{1}{N}}} \tilde t_{M+N-2}
+$$$
+\ _f
+and so the critical region for a test with significance level &alpha; is
+$$$
+C_\alpha = (-\infty, t_{M+N-2;\alpha/2}] \cup [t_{M+N-2;1-\alpha/2}, \infty)
+$$$
+\ _t
+One-sided tests are simply constructed as seen previously
+
+### Approximate Intervals and Tests
+We can readily adapt the confidence intervals and tests described so far to give ~()approximate~ results by appealing to the central limit theorem.
+
+**Exercise:** If *X ~ Bin(M, p{X})* independently of *Y ~ Bin(N, P{Y})*, show that an approximate *1 - &alpha;* stochastic confidence interval for *p{X} - p{Y}* is
+$$$
+(\hat{p_X} - \hat{p_Y}) \pm z_{1-\alpha/2}\sqrt{  \frac{\hat{p_X}(1-\hat{p_X})}{M}+\frac{\hat{p_Y}(1-\hat{p_Y})}{N}  }
+$$$
+where
+$$$
+\hat{p_X} = \frac{X}{M},\qquad\hat{p_Y}=\frac{Y}{N}
+$$$
+
+## Two Sample Inference for Variances
+How can we construct confidence intervals and hypothesis tests for the unknown variances of two random samples?
+Last time, we stated that for a normal random sample, *X{1}, ..., X{M} ~iid N(&mu;{X}, &sigma;{X}{{2}})*,
+$$$
+(M-1)\frac{S_X^2}{\sigma^2_X}\tilde X^2_{M-1}\equiv\text{Gamma}(\frac{M-1}{2},\frac{1}{2})
+$$$
+\ _f
+This time, we will state that if we have two independent normal random samples *X{1}, ..., X{M} ~iid N(&mu;{X}, &sigma;{X}{{2}})* and *Y{1}, ..., Y{N} ~iid N(&mu;{Y}, &sigma;{Y}{{2}})*,
+$$$
+\frac{S^2_X/\sigma^2_X}{S^2_Y/\sigma^2_Y} \tilde F_{M-1,N-1}
+$$$
+\ _f
+where *F{m,n}* is the *F*-distribution with *m* and *n* ~()degrees of freedom~
+
+**Remark:** As with the *t*-distribution, we will not go into details regarding the *F*-distribution, but simply accept this and rely on numerical computation or tabulation of its quantiles.
+Using this fact, we may write by definition
+$$$
+\mathbb{P}\left(  F_{N-1,M-1;\alpha/2} \leq \frac{S^2_Y/\sigma^2_Y}{S^2_X/\sigma^2_X} \leq F_{N-1,M-1;1-\alpha/2}  \right) = 1-\alpha
+$$$
+\ _f
+Rearranging, we have a stochastic *1 - &alpha;* confidence interval for the ratio of the unknown population variances:
+$$$
+\mathbb{P}\left( F_{N-1,M-1;\alpha/2}\frac{S^2_X}{S^2_Y} \leq \frac{\sigma^2_X}{\sigma^2_Y} \leq F_{N-1,M-1;1-\alpha/2}\frac{S^2_X}{S^2_Y} \right) = 1-\alpha
+$$$
+We may use this to construct hypothesis tests: *H{0} : &sigma;{X}{{2}} = &sigma;{Y}{{2}}* vs *H{1} : &sigma;{X}{{2}} /= &sigma;{Y}{{2}}*.
+Under *H{0}*,
+$$$
+\frac{S^2_X}{S^2_Y} \tilde F_{M-1,N-1}
+$$$
+\ _f
+and so an appropriate critical region at the &alpha; significance level is
+$$$
+C_\alpha = (-\infty, F_{M-1,N-1;\alpha/2}]\cup [F_{M-1,N-2;1-\alpha/2}, \infty)
+$$$
+\ _f
+One-sided tests can be constructed as seen before.
+
+## Summary
+- Two-sample difference of means; confidence intervals and hypothesis tests for normal population, known and unknown (common and not) variance.
+- Two-sample ratio of variances; *F* distribution (briefly), confidence intervals and hypothesis tests for normal population.
