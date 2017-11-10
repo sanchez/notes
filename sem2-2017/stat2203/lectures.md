@@ -901,3 +901,75 @@ $$$
 ## Summary
 - Regression; model, error term, linear regression, quadratic regression, linear models, residuals
 - Least squares; basis, normal equations, examples
+
+# Regression II
+## Linear Models
+Recall that a ~()linear model~ is a regression model of the form
+$$$
+Y = A\beta+\epsilon,\qquad\epsilon\sim N(0,\sigma^2I)
+$$$
+for some parameter vector &beta; and **design matrix** A (whose elements may depend on the outcomes of explanatory variables **X = x**). Given observed responses **Y = y** for a linear model, we had that the ~()least squares solution~ &hat;&beta; for the unknown parameters solved
+$$$
+A^TA\hat{\beta}=A^Ty
+$$$
+**Remark:** Geometrically, &hat;&beta; is the projection of **y** onto the subspace spanned by the columns of the design matrix A. We saw two examples of linear models, namely the ~()linear regression~ model and the ~()quadratic regression~ model. What other useful regression models are linear models?
+
+### Linear Models Example
+**Example:** ~()Polynomial regression models~ seek to find the best polynomial fit to noisy data. Formally, for a polynomial model of degree *n*, each response variable *Y{i}* is modelled as
+$$$
+Y_i=\sum^n_{k=0}\beta_kx^k_i+\epsilon_i
+$$$
+where *&epsilon;{i} ~ N(0, &sigma;{{2}})*.
+This can be seen as a linear model with design matrix
+$$$
+A = 
+\begin{pmatrix}
+1&x_i&x^2_i&\cdots&x^n_1\\
+\vdots&\vdots&\vdots&\vdots&\vdots\\
+1&x_N&x^2_N&\cdots&x^n_N
+\end{pmatrix}
+$$$
+Therefore, we can fit the regression model by solving for &hat;&beta;
+
+**Remark 1:** This suggests that a sensible approach to model fitting is to successively increase model complexity ~()until~ the variability seen in data is well explained by the model -- and the remaining variability is consistent with our assumptions on the error model.
+**Remark 2:** However, one pitfall is ~()overfitting~, where a more complex model will ~()always~ fit data better than a simpler model nested inside it. Therefore, we always seek the ~()simplest~ model that fits the data well.
+
+## Coefficient of Determination
+A measure of model fit is the **coefficient of determination**, which can be constructed by scaling the residuals by the sum of squared deviations from the mean of the observed responses:
+$$$
+R^2 = 1-\frac{\mid\mid r\mid\mid^2}{\mid\mid y-\bar{y}\mid\mid^2}
+$$$
+If *R{{2}}* is close to 0, then the model does no better than a constant model set to the sample mean *&bar;y*. On the other hand, if R{{2}} is close to 1, then the model well explains the variability inherent in the observed responses **y**.
+
+### R2 Example
+**Example (Response Surface Model):** Suppose we have reponse *\{y{i}\}* with two explanatory variables *x{i,1}* and *x{i,2}*. We wish to model data through a two-dimensional polynomial model
+$$$
+Y_i = \sum^n_{j=0}\sum^n_{k=0}\beta_{j,k}x^j_{i,1}x^k_{i,2}+\epsilon_i
+$$$
+We can rewrite this model as a linear model, and solve for &hat;&beta; for successively larger *n*, until the coefficient of determination *R{{2}}* is close to 1.
+
+## Residual Testing
+It seems that our final model fits well -- how can we test the quality of the fit? If our model consistent with observed data, then the ~()residuals~ *\{r{i}\}* should be a random sample from N(0, &sigma;{{2}}), where typically &sigma;{{2}} is not known. Note that, when the ~()design matrix A~ is of dimension *N &times; K* with *N > K*, there are only *N - K* linearly independent elements of **r**. Therefore,
+$$$
+\mathbb{E}[\mid\mid R\mid\mid^2 \mid X=x]=\mathbb{E}\left[ \sum^N_{i=1}(Y_i-A\hat{\beta})^2\mid X=x \right] = (N-K)\sigma^2
+$$$
+and so an ~()unbiased~ estimator of &sigma;{{2}} from the residuals is
+$$$
+S^2_R = \frac{1}{N-K}\sum^N_{i=1}R^2_i=\frac{1}{N-K}\sum^N_{i=1}(Y_i-A\hat{\beta})^2
+$$$
+Therefore, we can perform a hypothesis test on the residuals: *H{0} : &mu; = 0* vs *H{1} : &mu; /= 0*. Under *H{0}*, the statistic
+$$$
+T=\frac{\bar{R}}{S_R/\sqrt{N}}\sim t_{N-K}
+$$$
+\ _f
+where &bar;R and S{R} denote the sample mean and (unbiased) standard deviation of the residuals, respectively. Thus, ~()provided that the assumption of common variance is reasonable~, the *p*-value associated with this statistic under *H{0}* is a measure of the quality of our error model:
+$$$
+p = 2\text{max}\{\mathbb{P}(T>t),\mathbb{P}(T<t)\}
+$$$
+**Remark:** This assumption can be checked visually by examining plots of the residuals
+**Remark:** Up to now, we have implicitly assumed that there is only ~()one~ observation of the response for the ~()same~ set of explanatory variables. How multiple observations change our analysis will be subject of our next set of lectures.
+
+## Summary
+- Linear models; polynomial regression, response surface models, philosophy and pitfalls.
+- Coefficient of determination; definition, interpretation, example.
+- Residual testing; *t*-test for residuals
